@@ -29,7 +29,18 @@ def part1(input):
     return score
 
 def part2(input):
-    return "TODO"
+    score = 0
+    for line in input.splitlines():
+        elf, result = line.split()
+        elf = ord(elf) - ord('A')
+        result = ord(result) - ord('X') - 1
+
+        me = (elf + result) % 3
+
+        score += me + 1
+        score += ResultScore[(me - elf) % 3]
+
+    return score
 
 print('Example Part 1 (want 15)')
 print(part1(ExampleInput1))
@@ -39,7 +50,7 @@ print('Part 1')
 print(part1(realinput()))
 
 print()
-print('Example Part 2')
+print('Example Part 2 (want 12)')
 print(part2(ExampleInput1))
 
 print()
