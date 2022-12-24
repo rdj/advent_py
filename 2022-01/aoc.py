@@ -22,16 +22,7 @@ def realinput():
         return infile.read()
 
 def subtotals(input):
-    a = []
-    single = 0
-    for line in input.splitlines():
-        if line == '':
-            a.append(single)
-            single = 0
-            continue
-
-        single += int(line)
-    a.append(single)
+    a = [sum([int(x) for x in groups.strip().split("\n")]) for groups in input.split("\n\n")]
     a.sort(reverse=True)
     return a
 
