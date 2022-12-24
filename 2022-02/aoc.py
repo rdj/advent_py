@@ -6,40 +6,35 @@ B X
 C Z
 '''
 
-ResultScore = {
-    0: 3, # Draw
-    1: 6, # Win
-    2: 0, # Loss
-}
-
 def realinput():
     with open("input.txt", "r") as infile:
         return infile.read()
 
-def part1(input):
-    score = 0
+def parse(input):
+    a = []
     for line in input.splitlines():
         elf, me = line.split()
         elf = ord(elf) - ord('A')
         me = ord(me) - ord('X')
+        a.append((elf, me))
+    return a
 
-        score += me + 1
-        score += ResultScore[(me - elf) % 3]
+def score_round(elf, me):
+    score = me + 1
+    score += 3 * ((me - elf + 1) % 3)
+    return score
 
+def part1(input):
+    score = 0
+    for (elf, me) in parse(input):
+        score += score_round(elf, me)
     return score
 
 def part2(input):
     score = 0
-    for line in input.splitlines():
-        elf, result = line.split()
-        elf = ord(elf) - ord('A')
-        result = ord(result) - ord('X') - 1
-
-        me = (elf + result) % 3
-
-        score += me + 1
-        score += ResultScore[(me - elf) % 3]
-
+    for (elf, result) in parse(input):
+        me = (elf + result - 1) % 3
+        score += score_round(elf, me)
     return score
 
 print('Example Part 1 (want 15)')
