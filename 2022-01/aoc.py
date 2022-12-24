@@ -21,21 +21,37 @@ def realinput():
     with open("input.txt", "r") as infile:
         return infile.read()
 
-def part1(input):
-    best = 0
+def subtotals(input):
+    a = []
     single = 0
     for line in input.splitlines():
         if line == '':
+            a.append(single)
             single = 0
             continue
 
         single += int(line)
-        best = max(best, single)
-    return best
+    a.append(single)
+    a.sort(reverse=True)
+    return a
 
-print('Example')
+def part1(input):
+    return subtotals(input)[0]
+
+def part2(input):
+    return sum(subtotals(input)[0:3])
+
+print('Example Part 1')
 print(part1(ExampleInput1))
 
 print()
 print('Part 1')
 print(part1(realinput()))
+
+print()
+print('Example Part 2')
+print(part2(ExampleInput1))
+
+print()
+print('Part 2')
+print(part2(realinput()))
