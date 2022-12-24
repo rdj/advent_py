@@ -22,15 +22,15 @@ def realinput():
         return infile.read()
 
 def subtotals(input):
-    a = [sum([int(x) for x in groups.strip().split("\n")]) for groups in input.split("\n\n")]
-    a.sort(reverse=True)
-    return a
+    return [sum([int(line) for line in line_groups.strip().split("\n")]) for line_groups in input.split("\n\n")]
 
 def part1(input):
-    return subtotals(input)[0]
+    return max(subtotals(input))
 
 def part2(input):
-    return sum(subtotals(input)[0:3])
+    a = subtotals(input)
+    a.sort(reverse=True)
+    return sum(a[0:3])
 
 print('Example Part 1')
 print(part1(ExampleInput1))
