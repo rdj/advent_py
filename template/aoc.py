@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-ExampleInput1 = '''`
+ExampleInput1 = '''\
 '''
 
 def realinput():
