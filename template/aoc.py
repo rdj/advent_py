@@ -18,19 +18,19 @@ def real_input():
 
 
 def run_all():
-    print('Example Part 1')
+    print("Example Part 1")
     print(part1(ExampleInput1))
 
     print()
-    print('Part 1')
+    print("Part 1")
     print(part1(real_input()))
 
     print()
-    print('Example Part 2')
+    print("Example Part 2")
     print(part2(ExampleInput1))
 
     print()
-    print('Part 2')
+    print("Part 2")
     print(part2(real_input()))
 
 
