@@ -1,29 +1,38 @@
 #!/usr/bin/env python3
 
-ExampleInput1 = '''\
-'''
+ExampleInput1 = """\
+"""
 
-def realinput():
+
+def part1(s):
+    return "TODO"
+
+
+def part2(s):
+    return "TODO"
+
+
+def real_input():
     with open("input.txt", "r") as infile:
         return infile.read()
 
-def part1(input):
-    return "TODO"
 
-def part2(input):
-    return "TODO"
+def run_all():
+    print('Example Part 1')
+    print(part1(ExampleInput1))
 
-print('Example Part 1')
-print(part1(ExampleInput1))
+    print()
+    print('Part 1')
+    print(part1(real_input()))
 
-print()
-print('Part 1')
-print(part1(realinput()))
+    print()
+    print('Example Part 2')
+    print(part2(ExampleInput1))
 
-print()
-print('Example Part 2')
-print(part2(ExampleInput1))
+    print()
+    print('Part 2')
+    print(part2(real_input()))
 
-print()
-print('Part 2')
-print(part2(realinput()))
+
+if __name__ == "__main__":
+    run_all()
