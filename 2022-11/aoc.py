@@ -124,7 +124,8 @@ def do_round(monkeys, shrinkfn):
 
 
 def extract(monkeys):
-    *_, a, b = sorted((m.inspected for m in monkeys))
+    a, b = deque(sorted(m.inspected for m in monkeys), maxlen=2)
+    # *_, a, b = sorted((m.inspected for m in monkeys))
     return a * b
 
 
