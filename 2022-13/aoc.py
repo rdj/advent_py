@@ -4,8 +4,6 @@ import functools as ft
 import itertools as it
 import operator
 
-from enum import IntEnum, auto
-
 ExampleInput1 = """\
 [1,1,3,1,1]
 [1,1,5,1,1]
