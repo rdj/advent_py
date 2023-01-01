@@ -82,9 +82,8 @@ class Maze:
 
 def parse(s):
     start, end = None, None
-    y = 0
     rows = []
-    for s in s.splitlines():
+    for y, s in enumerate(s.splitlines()):
         if start is None and (x := s.find("S")) != -1:
             start = Point(x, y)
             s = s.replace("S", "a")
@@ -92,7 +91,6 @@ def parse(s):
             end = Point(x, y)
             s = s.replace("E", "z")
         rows.append(s)
-        y += 1
     assert start is not None, "Found no start tile"
     assert end is not None, "Found no end tile"
     return Maze(rows, start, end)
