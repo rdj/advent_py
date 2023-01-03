@@ -45,9 +45,9 @@ def parse(s):
         m = VALVE_PATTERN.match(line)
         assert m, line
         v = Valve(
-            m.group("name"),
-            int(m.group("rate")),
-            m.group("tunnels").split(", ")
+            m["name"],
+            int(m["rate"]),
+            m["tunnels"].split(", ")
         )
         valves[v.name] = v
 
