@@ -63,17 +63,18 @@ def shortest_paths(valves):
     return dict(nx.all_pairs_shortest_path_length(G))
 
 
-class WorkItem(NamedTuple):
+class Worker(NamedTuple):
     time: int
     pos: str
+
+
+class WorkItem(NamedTuple):
+    workers: tuple
     flow: int
-    opened: list
-
-    def best_key(self):
-        return (self.pos, self.opened)
+    opened: int
 
 
-def best_flow(valves, time_limit):
+def best_flow(valves, time_limit, friend=False):
     SRC = "AA"
 
     costs = shortest_paths(valves)
@@ -81,27 +82,33 @@ def best_flow(valves, time_limit):
     best = {}
 
     q = deque()
-    q.append(WorkItem(time=0, pos=SRC, flow=0, opened=()))
+    q.append(WorkItem((Worker(0, SRC), Worker(0, SRC)), flow=0, opened=0))
 
     while len(q) > 0:
         cur = q.popleft()
 
-        if cur.flow < best.get(cur.best_key(), 0):
+        wi = 0
+        if friend and cur.workers[1].time < cur.workers[0].time:
+            wi = 1
+
+        # This pruning does not work in the multiple-workers case
+        if not friend and cur.flow < best.get((cur.workers[wi].pos, cur.opened), 0):
             continue
 
-        for v in to_open:
-            if v in cur.opened:
+        for i, v in enumerate(to_open):
+            vFlag = 1 << i
+            if cur.opened & vFlag:
                 continue
 
-            t = cur.time + costs[cur.pos][v] + 1
+            t = cur.workers[wi].time + costs[cur.workers[wi].pos][v] + 1
             f = cur.flow + valves[v].rate * (time_limit - t)
-            o = list(cur.opened)
-            o.append(v)
-            o.sort()
-            o = tuple(o)
+            o = cur.opened | vFlag
 
-            w = WorkItem(time=t, pos=v, flow=f, opened=o)
-            key = w.best_key()
+            workers = list(cur.workers)
+            workers[wi] = Worker(t, v)
+
+            w = WorkItem(workers=workers, flow=f, opened=o)
+            key = (v, o)
             if w.flow < best.get(key, 0):
                 continue
             best[key] = w.flow
@@ -117,7 +124,8 @@ def part1(s):
 
 
 def part2(s):
-    return "TODO"
+    valves = parse(s)
+    return best_flow(valves, 26, friend=True)
 
 
 def real_input():
@@ -134,11 +142,11 @@ def run_all():
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (1707)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (2169)")
     print(part2(real_input()))
 
 
