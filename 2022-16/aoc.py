@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import deque
+from heapq import heappush, heappop
 import re
 from typing import NamedTuple
 
@@ -73,6 +74,9 @@ class WorkItem(NamedTuple):
     flow: int
     opened: int
 
+    def best_key(self):
+        return (self.workers[0].pos, self.workers[1].pos, self.opened)
+
 
 def best_flow(valves, time_limit, friend=False):
     SRC = "AA"
@@ -80,42 +84,58 @@ def best_flow(valves, time_limit, friend=False):
     costs = shortest_paths(valves)
     to_open = [v.name for v in valves.values() if v.rate > 0]
     best = {}
+    best_overall = 0
 
-    q = deque()
-    q.append(WorkItem((Worker(0, SRC), Worker(0, SRC)), flow=0, opened=0))
+    def max_possible_flow(w):
+        t = max(w.workers[0].time, w.workers[1].time)
+        vf = 0
+        for i, v in enumerate(to_open):
+            if not w.opened & 1 << i:
+                vf += valves[v].rate
+        vf *= time_limit - t
+        return w.flow + vf
+
+    q = []
+    heappush(q, (0, WorkItem((Worker(0, SRC), Worker(0, SRC)), flow=0, opened=0)))
 
     while len(q) > 0:
-        cur = q.popleft()
+        curmaxf, cur = heappop(q)
+
+        if -curmaxf < best_overall:
+            continue
 
         wi = 0
         if friend and cur.workers[1].time < cur.workers[0].time:
             wi = 1
 
-        # This pruning does not work in the multiple-workers case
-        if not friend and cur.flow < best.get((cur.workers[wi].pos, cur.opened), 0):
-            continue
-
         for i, v in enumerate(to_open):
-            vFlag = 1 << i
-            if cur.opened & vFlag:
+            flag = 1 << i
+            if cur.opened & flag:
                 continue
 
             t = cur.workers[wi].time + costs[cur.workers[wi].pos][v] + 1
             f = cur.flow + valves[v].rate * (time_limit - t)
-            o = cur.opened | vFlag
+            o = cur.opened | flag
 
             workers = list(cur.workers)
             workers[wi] = Worker(t, v)
 
             w = WorkItem(workers=workers, flow=f, opened=o)
-            key = (v, o)
+
+            maxf = max_possible_flow(w)
+            if maxf < best_overall:
+                continue
+
+            key = w.best_key()
             if w.flow < best.get(key, 0):
                 continue
             best[key] = w.flow
 
-            q.append(w)
+            best_overall = max(best_overall, w.flow)
 
-    return max(best.values())
+            heappush(q, (-maxf, w))
+
+    return best_overall
 
 
 def part1(s):
