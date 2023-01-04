@@ -55,6 +55,9 @@ def parse(s):
     return valves
 
 
+# When I solved this problem in Go, I implemented Floyd-Warshall myself, but
+# since I'd already done that I decided there was more value in learning how
+# to use networkx in python.
 def shortest_paths(valves):
     G = nx.Graph()
     for v in valves.values():
@@ -87,6 +90,9 @@ def best_flow(valves, time_limit, friend=False):
     best_overall = 0
 
     def max_possible_flow(w):
+        """Heuristic function for pruning and A-star priority. Computes
+        an overestimate of the max possible flow by just assuming all
+        the rest of the valves magically open all at once right now."""
         t = max(w.workers[0].time, w.workers[1].time)
         vf = 0
         for i, v in enumerate(to_open):
