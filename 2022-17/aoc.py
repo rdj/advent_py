@@ -7,6 +7,7 @@ ExampleInput1 = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
 CAVE_WIDTH = 7
 MARGIN_LEFT = 2
 MARGIN_BOTTOM = 3
+CYCLE_PEEK = 20
 
 
 class Point(NamedTuple):
@@ -20,29 +21,20 @@ class Point(NamedTuple):
         return Point(self.x - other.x, self.y - other.y)
 
 
+LEFT = Point(-1, 0)
+RIGHT = Point(1, 0)
+DOWN = Point(0, -1)
+
+
 class Shape:
     def __init__(self, offsets):
         self.offsets = tuple(Point(*p) for p in offsets)
-        self.height = max(y for (_, y) in offsets) + 1
-        self.width = max(x for (x, _) in offsets) + 1
-
-    def __repr__(self):
-        s = []
-        for y in range(self.height - 1, -1, -1):
-            if len(s):
-                s.append("\n")
-            for x in range(self.width):
-                if Point(x, y) in self.offsets:
-                    s.append("#")
-                else:
-                    s.append(".")
-        return "".join(s)
 
     def at(self, p):
         return [o + p for o in self.offsets]
 
 
-SHAPES = tuple(Shape(_) for _ in (
+SHAPES = tuple(Shape(offsets) for offsets in (
     #   @@@@
     ((0, 0), (1, 0), (2, 0), (3, 0)),
 
@@ -67,10 +59,6 @@ SHAPES = tuple(Shape(_) for _ in (
     ((0, 0), (1, 0), (0, 1), (1, 1)),
 ))
 
-LEFT = Point(-1, 0)
-RIGHT = Point(1, 0)
-DOWN = Point(0, -1)
-
 
 class Cave:
     def __init__(self):
@@ -78,16 +66,7 @@ class Cave:
         self.height = 0
 
     def __repr__(self):
-        s = []
-        for y in range(self.height - 1, -1, -1):
-            if len(s):
-                s.append("\n")
-            for x in range(CAVE_WIDTH):
-                if Point(x, y) in self.state:
-                    s.append("#")
-                else:
-                    s.append(".")
-        return "".join(s)
+        return self.top(self.height)
 
     def _legal_pt(self, p):
         return (
@@ -97,48 +76,98 @@ class Cave:
         )
 
     def is_legal_placement(self, shape, point):
-        points = shape.at(point)
-        if any(not self._legal_pt(p) for p in points):
-            return None
-        return points
+        return all(self._legal_pt(p) for p in shape.at(point))
 
     def place(self, shape, point):
         for p in shape.at(point):
             self.height = max(self.height, p.y + 1)
             self.state.add(p)
 
+    def top(self, maxlines):
+        s = []
+
+        start = self.height - 1
+        thru = max(-1, start - maxlines)
+
+        for y in range(start, thru, -1):
+            if len(s):
+                s.append("\n")
+            for x in range(CAVE_WIDTH):
+                if Point(x, y) in self.state:
+                    s.append("#")
+                else:
+                    s.append(".")
+        return "".join(s)
+
+
+class Cycle(NamedTuple):
+    length: int
+    shape_base: int
+    height_base: int
+    height_delta: int
+
+    def _cycle_index(self, n):
+        return (n - self.shape_base) % self.length
+
+    def equivalent(self, n, m):
+        return self._cycle_index(n) == self._cycle_index(m)
+
+    def height_at(self, r):
+        cycle_count = (r - self.shape_base) // self.length
+        return self.height_base + cycle_count * self.height_delta
+
 
 def simulate(moves, wanted):
     cave = Cave()
-    cursor = 0
+
+    cycle = None
+    seen = {}
+
+    mi = 0
 
     for r in range(wanted):
-        s = SHAPES[r % len(SHAPES)]
+        si = r % len(SHAPES)
+
+        if cycle is None:
+            key = (si, mi, cave.top(CYCLE_PEEK))
+            if key in seen:
+                r0, h0 = seen[key]
+                cycle = Cycle(
+                    length=r-r0,
+                    shape_base=r0,
+                    height_base=h0,
+                    height_delta=cave.height - h0,
+                )
+            else:
+                seen[key] = (r, cave.height)
+        elif cycle.equivalent(r, wanted):
+            extra = cave.height - cycle.height_at(r)
+            return cycle.height_at(wanted) + extra
+
+        s = SHAPES[si]
         p = Point(MARGIN_LEFT, cave.height + MARGIN_BOTTOM)
 
         while True:
-            delta = None
-            m = moves[cursor % len(moves)]
-            cursor += 1
+            m = moves[mi]
+            mi = (mi + 1) % len(moves)
+
             match m:
                 case "<":
-                    delta = LEFT
+                    n = p + LEFT
                 case ">":
-                    delta = RIGHT
+                    n = p + RIGHT
                 case _:
-                    raise Exception(f"Unknown move: {m}")
-
-            n = p + delta
+                    assert False
             if cave.is_legal_placement(s, n):
                 p = n
 
-            delta = DOWN
-            n = p + delta
+            n = p + DOWN
             if cave.is_legal_placement(s, n):
                 p = n
             else:
                 cave.place(s, p)
                 break
+
     return cave.height
 
 
@@ -147,8 +176,7 @@ def part1(s):
 
 
 def part2(s):
-    return "TODO"
-    # return simulate(s.strip(), 1_000_000_000_000)
+    return simulate(s.strip(), 1_000_000_000_000)
 
 
 def real_input():
@@ -165,11 +193,11 @@ def run_all():
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (1514285714288)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (1504093567249)")
     print(part2(real_input()))
 
 
