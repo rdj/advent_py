@@ -100,7 +100,7 @@ def part1(s):
     numbers = [e for e in entries if e.value.isnumeric()]
     symbols = [e for e in entries if not e.value.isnumeric()]
 
-    matched = [e for e in entries if any(e.is_point_adjacent(s.location) for s in symbols)]
+    matched = [n for n in numbers if any(n.is_point_adjacent(s.location) for s in symbols)]
 
     return sum(int(e.value) for e in matched)
 
@@ -120,6 +120,7 @@ def part2(s):
             result += int(matches[0].value) * int(matches[1].value)
 
     return result
+
 
 def real_input():
     with open("input.txt", "r") as infile:
