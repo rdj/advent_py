@@ -96,30 +96,42 @@ def part1(s):
     return min(outputs)
 
 
-class Mappers:
-    def __init__(self, mappers):
-        self.mappers = mappers
-
-    def fully_map(self, n):
-        for mapper in self.mappers:
-            n = do_map(n, mapper)
-        return n
-
-
 def part2(s):
     d = parse(s)
-    best = None
 
-    m = Mappers(d['maps'])
-    p = Pool(12)
-    for start, length in it.batched(d['seeds'], n=2):
-        outputs = p.map(m.fully_map, range(start, start+length))
-        if not best:
-            best = min(outputs)
-        else:
-            best = min(best, min(outputs))
+    inputs = [range(start, start+length) for start, length in it.batched(d['seeds'], n=2)]
 
-    return best
+    outputs = inputs
+
+    for layer_num, mapping in enumerate(d['maps']):
+        inputs = outputs
+        outputs = []
+        while len(inputs) > 0:
+            inrange = inputs.pop()
+            for matchrange, offset in mapping:
+                overlap = range(max(inrange[0], matchrange[0]), min(inrange[-1], matchrange[-1]) + 1)
+                if len(overlap) == 0:
+                    continue
+
+                outrange = range(overlap[0] - matchrange[0] + offset, overlap[-1] - matchrange[0] + offset + 1)
+                assert(len(overlap) == len(outrange))
+                outputs.append(outrange)
+
+                before = range(inrange[0], overlap[0])
+                if len(before) > 0:
+                    inputs.append(before)
+
+                after = range(overlap[-1] + 1, inrange[-1] + 1)
+                if len(after) > 0:
+                    inputs.append(after)
+
+                assert(len(before) + len(overlap) + len(after) == len(inrange))
+                inrange = None
+                break
+            if inrange:
+                outputs.append(inrange)
+
+    return min(r[0] for r in outputs)
 
 
 def real_input():
@@ -136,11 +148,11 @@ def run_all():
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (46)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (100165128)")
     print(part2(real_input()))
 
 
