@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 import re
 
 from functools import reduce
@@ -34,27 +35,55 @@ def part1(s):
     return reduce(mul, results, 1)
 
 
-def find_lower(t, d):
-    for n in range(t):
-        if (t - n) * n > d:
-            return n
-    raise Exception("found no lower bound")
-
-
-def find_upper(t, d):
-    for n in range(t, 0, -1):
-        if (t - n) * n > d:
-            return n
-    raise Exception("found no upper bound")
-
-
 def part2(s):
     t, d = [int(re.sub(r'\s+','', line).split(':')[-1]) for line in s.splitlines()]
 
-    lower = find_lower(t,d)
-    upper = find_upper(t,d)
+    # We're asked to find the values of x where
+    #
+    #   x * (t - x) > d
+    #
+    # This can be rewritten in the form of a quadratic:
+    #
+    #   -x**2 + t*x - d > 0
+    #
+    # So the bounds will be the (closest integers to) the roots of the
+    # quadratic equation:
+    #
+    #   a*x**2 + b*x + c = 0, given a = -1, b = t, c = -d
+    #
+    # Which, by middle school math, can be found using the:
+    #  Q U A D R A T I C
+    #    F O R M U L A
+    #
+    # If you've forgotten Mrs. Felke's algebra class:
+    #   https://en.wikipedia.org/wiki/Quadratic_formula
+    #
+    #   x = ( -b ± sqrt(b**2 - 4*a*c) ) / 2*a
+    #
 
-    return upper + 1 - lower
+    a = -1
+    b = t
+    c = -d
+
+    # First figure the determinant (the part under the radical). It, uh,
+    # determines what kinds of roots the equation has. Negative determinate
+    # means no real roots, which would be bad. Zero means one real root, which
+    # would be real weird for this puzzle. Positive means two real roots,
+    # that's what we want, then the space between them is our solution.
+
+    det = b * b - 4 * a * c
+    assert( det > 0 )
+
+    rad = math.sqrt(det)
+    r0 = ( -b + rad ) / 2*a
+    r1 = ( -b - rad ) / 2*a
+
+    # In theory you should be a little more careful about this, but we know the
+    # puzzle is designed to work out, so we can just sweep some things under
+    # the rug here like making sure these in fact bound the solution space
+    # (rather than the non-solution space) and rounding each number towards the
+    # middle.
+    return math.floor(math.fabs(r0 - r1))
 
 
 def real_input():
