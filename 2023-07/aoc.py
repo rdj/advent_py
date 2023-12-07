@@ -9,7 +9,7 @@ T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483
-""".strip()
+"""
 
 
 CARD_RANKS = '23456789TJQKA'
@@ -33,19 +33,21 @@ def score_hand(hand, jokers=False):
     else:
         counts[0] += joker_count
 
-    if counts[0] == 5:
-        return HandRank.FIVE_OF_A_KIND
-    if counts[0] == 4:
-        return HandRank.FOUR_OF_A_KIND
-    if counts == [3, 2]:
-        return HandRank.FULL_HOUSE
-    if counts[0] == 3:
-        return HandRank.THREE_OF_A_KIND
-    if counts == [2, 2, 1]:
-        return HandRank.TWO_PAIR
-    if counts[0] == 2:
-        return HandRank.ONE_PAIR
-    return HandRank.HIGH_CARD
+    match counts:
+        case 5, *_:
+            return HandRank.FIVE_OF_A_KIND
+        case 4, *_:
+            return HandRank.FOUR_OF_A_KIND
+        case 3, 2, *_:
+            return HandRank.FULL_HOUSE
+        case 3, *_:
+            return HandRank.THREE_OF_A_KIND
+        case 2, 2, 1:
+            return HandRank.TWO_PAIR
+        case 2, *_:
+            return HandRank.ONE_PAIR
+        case _:
+            return HandRank.HIGH_CARD
 
 
 def hand_sort_key(hand, jokers=False):
@@ -54,10 +56,7 @@ def hand_sort_key(hand, jokers=False):
         card_ranks = CARD_RANKS_JOKER
 
     score = score_hand(hand, jokers)
-    key = [score.value]
-    for c in hand:
-        key.append(card_ranks.index(c))
-    return tuple(key)
+    return (score.value, tuple(card_ranks.index(c) for c in hand))
 
 
 def parse(s):
@@ -73,8 +72,7 @@ def get_total(s, jokers=False):
     entries.sort(key=lambda e:hand_sort_key(e[0], jokers))
 
     answer = 0
-    for n, (hand, bid) in enumerate(entries):
-        rank = n + 1
+    for rank, (hand, bid) in enumerate(entries, start=1):
         answer += rank * bid
     return answer
 
@@ -89,7 +87,7 @@ def part2(s):
 
 def real_input():
     with open("input.txt", "r") as infile:
-        return infile.read().strip()
+        return infile.read()
 
 
 def run_all():
