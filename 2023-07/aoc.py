@@ -26,7 +26,7 @@ def score_hand(hand, jokers=False):
         joker_count = counts['J']
         del counts['J']
 
-    counts = list(reversed(sorted(counts.values())))
+    counts = [n for _, n in counts.most_common()]
     if len(counts) == 0:
         # There's a hand with all jokers!
         counts = [joker_count]
