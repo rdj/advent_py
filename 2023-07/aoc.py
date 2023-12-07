@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
+from collections import Counter
 from enum import Enum
 
 ExampleInput1 = """\
@@ -12,16 +12,14 @@ QQQJA 483
 """.strip()
 
 
-CARD_RANKS = tuple(_ for _ in '23456789TJQKA')
-CARD_RANKS_JOKER = tuple(_ for _ in 'J23456789TQKA')
+CARD_RANKS = '23456789TJQKA'
+CARD_RANKS_JOKER = 'J23456789TQKA'
 
 HandRank = Enum('HandRank', ['HIGH_CARD', 'ONE_PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'FULL_HOUSE', 'FOUR_OF_A_KIND', 'FIVE_OF_A_KIND'])
 
 
 def score_hand(hand, jokers=False):
-    counts = defaultdict(int)
-    for c in hand:
-        counts[c] += 1
+    counts = Counter(hand)
 
     joker_count = 0
     if jokers:
