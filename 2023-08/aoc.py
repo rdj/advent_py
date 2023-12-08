@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+import re
 
 from functools import reduce
 
@@ -40,10 +41,16 @@ XXX = (XXX, XXX)
 def parse_nodes(lines):
     nodes = {}
     for line in lines:
-        name, conns = line.split(' = ')
-        left, right = conns[1:-1].split(', ')
+        name, left, right = re.findall(r'[A-Z0-9]{3}', line)
         nodes[name] = (left, right)
     return nodes
+
+
+def parse(s):
+    lines = s.splitlines()
+    prog = lines[0]
+    nodes = parse_nodes(lines[2:])
+    return prog, nodes
 
 
 def do_once(prog, nodes, start='AAA'):
@@ -60,26 +67,17 @@ def do_once(prog, nodes, start='AAA'):
 
 
 def part1(s):
-    lines = s.splitlines();
-    prog = lines[0]
-    nodes = parse_nodes(lines[2:])
-
+    prog, nodes = parse(s)
     return do_once(prog, nodes)
 
 
-def lcm(a, b):
-    return abs(a*b) // math.gcd(a, b)
-
-
 def part2(s):
-    lines = s.splitlines();
-    prog = lines[0]
-    nodes = parse_nodes(lines[2:])
+    prog, nodes = parse(s)
 
     starts = [_ for _ in nodes.keys() if _.endswith('A')]
     cycles = [do_once(prog, nodes, _) for _ in starts]
 
-    return reduce(lcm, cycles, 1)
+    return reduce(math.lcm, cycles, 1)
 
 
 def real_input():
