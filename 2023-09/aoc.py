@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from functools import reduce
-import more_itertools as mit
+import itertools as it
 
 ExampleInput1 = """\
 0 3 6 9 12 15
@@ -17,7 +16,7 @@ def parse(s):
 def get_diffs(line):
     diffs = [list(line)]
     while any(diffs[-1]):
-        diffs.append([b - a for a, b in mit.windowed(diffs[-1], 2)])
+        diffs.append([b - a for a, b in it.pairwise(diffs[-1])])
     return diffs
 
 
