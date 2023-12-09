@@ -21,23 +21,21 @@ def get_diffs(line):
     return diffs
 
 
-def part1(s):
+def do_part1(parsed):
     futures = []
-    for line in parse(s):
+    for line in parsed:
         diffs = get_diffs(line)
         futures.append(sum(diff[-1] for diff in diffs))
 
     return sum(futures)
 
 
-def part2(s):
-    priors = []
-    for line in parse(s):
-        diffs = get_diffs(line)
-        firsts = (_[0] for _ in reversed(diffs)) # reverse b/c order matters for subtraction!
-        priors.append(reduce(lambda v,e: e - v, firsts))
+def part1(s):
+    return do_part1(parse(s))
 
-    return sum(priors)
+
+def part2(s):
+    return do_part1(map(reversed, parse(s)))
 
 
 def real_input():
