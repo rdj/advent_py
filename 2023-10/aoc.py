@@ -67,9 +67,6 @@ class Point(NamedTuple):
     def neighbors(self):
         return (self + d for d in DIRECTIONS)
 
-    def neighbors_all(self):
-        return (self + d for d in DIRECTIONS + DIRECTIONS_DIAGONAL)
-
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y)
 
@@ -92,10 +89,6 @@ SOUTH = Point(0, 1)
 
 DIRECTIONS = tuple(sorted((
     NORTH, WEST, EAST, SOUTH
-)))
-
-DIRECTIONS_DIAGONAL = tuple(sorted((
-    NORTH + WEST, NORTH + EAST, SOUTH + WEST, SOUTH + EAST,
 )))
 
 CONNECTIONS = {
@@ -155,9 +148,6 @@ class Grid:
 
     def neighbors(self, p):
         return [n for n in p.neighbors() if 0 <= n.x < self.width and 0 <= n.y < self.height]
-
-    def neighbors_all(self, p):
-        return [n for n in p.neighbors_all() if 0 <= n.x < self.width and 0 <= n.y < self.height]
 
     @cached_property
     def first_steps(self):
@@ -259,7 +249,7 @@ def part2(s):
         while to_visit:
             p = to_visit.pop()
             outside.add(p)
-            for n in x2grid.neighbors_all(p):
+            for n in x2grid.neighbors(p):
                 if n not in x2loop and n not in outside:
                     to_visit.append(n)
 
