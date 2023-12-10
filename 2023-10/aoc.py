@@ -160,8 +160,8 @@ class Grid:
 
     @cached_property
     def start(self):
-        for y in range(len(self.grid)):
-            for x in range(len(self.grid[0])):
+        for y in range(self.height):
+            for x in range(self.width):
                 if self.grid[y][x] == 'S':
                     return Point(x, y)
         raise Exception("No start tile")
@@ -216,18 +216,15 @@ def part2(s):
     # stuff can fit in between
     x2loop = set()
     x2grid = [list('.' * g.width * 2) for _ in range(g.height * 2)]
-    for y in range(g.height):
-        for x in range(g.width):
-            psrc = Point(x, y)
-            if psrc in loop:
-                x2pipe = DOUBLED[g.get(psrc)]
-                for dy in range(2):
-                    for dx in range(2):
-                        pdst = Point(2*x + dx, 2*y + dy)
-                        c = x2pipe[dy][dx]
-                        if c != '.':
-                            x2loop.add(pdst)
-                        x2grid[pdst.y][pdst.x] = c
+    for psrc in loop:
+        x2pipe = DOUBLED[g.get(psrc)]
+        for dy in range(2):
+            for dx in range(2):
+                pdst = Point(2*psrc.x + dx, 2*psrc.y + dy)
+                c = x2pipe[dy][dx]
+                if c != '.':
+                    x2loop.add(pdst)
+                x2grid[pdst.y][pdst.x] = c
 
     # Fix the start square, could have skipped this but it was super helpful
     # when printing and debugging
