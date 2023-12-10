@@ -279,7 +279,7 @@ def part2(s):
         for x in range(g.width):
             psrc = Point(x, y)
             pdst = Point(2*x, 2*y)
-            if psrc not in loop and pdst not in outside and x2grid.get(pdst) == '.':
+            if psrc not in loop and pdst not in outside:
                 incount += 1
 
     return incount
