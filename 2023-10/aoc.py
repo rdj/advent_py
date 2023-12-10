@@ -237,8 +237,7 @@ def part2(s):
 
     x2grid = Grid("\n".join("".join(_) for _ in x2grid))
 
-
-    # Pretty inefficient BFS just goes around and marks everything reachable
+    # Pretty inefficient DFS just goes around and marks everything reachable
     # from the edges
     outside = set()
     def mark_outside(p):
