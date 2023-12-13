@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from functools import lru_cache
+
 ExampleInput1 = """\
 ???.### 1,1,3
 .??..??...?##. 1,1,3
@@ -9,7 +11,7 @@ ExampleInput1 = """\
 ?###???????? 3,2,1
 """
 
-
+@lru_cache
 def numways(pattern, groups):
     # Base case, groups exhausted
     if len(groups) == 0:
@@ -65,7 +67,18 @@ def part1(s):
 
 
 def part2(s):
-    return "TODO"
+    total = 0
+    for lineno, line in enumerate(s.splitlines()):
+        pattern, groupstr = line.split(' ')
+        groups = tuple(map(int, groupstr.split(',')))
+
+        pattern = '?'.join([pattern]*5)
+        groups = groups * 5
+
+        a = numways(pattern, groups)
+        total += a
+
+    return total
 
 
 def real_input():
