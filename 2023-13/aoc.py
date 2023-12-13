@@ -28,7 +28,7 @@ def parse(s):
     return blocks
 
 
-def check_horz(tiles, mistakes_wanted=0):
+def check_horz(tiles, mistakes_wanted):
     h = len(tiles)
     w = len(tiles[0])
     for mirror in range(1, h):
@@ -52,34 +52,27 @@ def check_vert(tiles, mistakes_wanted=0):
     return check_horz(tiles, mistakes_wanted)
 
 
-def part1(s):
+def do_it(s, mistakes_wanted):
     total = 0
     for n, tiles in enumerate(parse(s)):
-        h = check_horz(tiles)
+        h = check_horz(tiles, mistakes_wanted)
         if h:
             total += 100 * h
             continue
-        v = check_vert(tiles)
+        v = check_vert(tiles, mistakes_wanted)
         if v:
             total += v
             continue
         assert False
     return total
+
+
+def part1(s):
+    return do_it(s, 0)
 
 
 def part2(s):
-    total = 0
-    for n, tiles in enumerate(parse(s)):
-        h = check_horz(tiles, 1)
-        if h:
-            total += 100 * h
-            continue
-        v = check_vert(tiles, 1)
-        if v:
-            total += v
-            continue
-        assert False
-    return total
+    return do_it(s, 1)
 
 
 def real_input():
