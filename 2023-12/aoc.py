@@ -10,26 +10,22 @@ ExampleInput1 = """\
 """
 
 
-def numways(pattern, groups, sofar=""):
-    #print(f"=> {pattern} {groups}")
-    # Base case, found a working match
+def numways(pattern, groups):
+    # Base case, groups exhausted
     if len(groups) == 0:
+        # Any springs left? That would be a nope
         if '#' in pattern:
-            #print("0 <= UNUSED SPRINGS!")
             return 0
 
-        #print(f"MATCH === {sofar} ===")
-        #print("1 <= DONE!")
+        # Otherwise, good match
         return 1
 
     # Fixed leading dots are, uh, fixed, so we can skip over them
     while len(pattern) and pattern[0] == '.':
         pattern = pattern[1:]
-        sofar += '.'
 
     # Shortcut out if there's not enough pattern left to fit the groups
     if len(pattern) < sum(groups) + len(groups) - 1:
-        #print("0 <= OUT OF ROOM!")
         return 0
 
     glen = groups[0]
@@ -41,29 +37,19 @@ def numways(pattern, groups, sofar=""):
             return 0
         for c in pattern[0:glen]:
             if c == '.':
-                #print("0 <= BLOCKING DOT")
                 return 0
 
         # And can't be trailed by a spring
         if len(pattern) > glen and pattern[glen] == '#':
-            #print("0 <= TRAILING SPRING")
             return 0
 
-        sofar += '#' * glen
-        if len(pattern) > glen:
-            sofar += '.'
         remains = pattern[glen+1:]
-        #print(f"=v PLACED {glen}! {remains}")
-        return numways(remains, groups[1:], sofar)
+        return numways(remains, groups[1:])
 
     assert pattern[0] == '?'
     skip = pattern[1:]
     place = '#' + skip
-    #print(f">> SPLITTING! {place} | {skip}")
-    nplace = numways(place, groups, sofar + '#')
-    nskip = numways(skip, groups, sofar + '.')
-    #print(f"<< JOINING! {nplace} + {nskip}")
-    return nskip + nplace
+    return numways(place, groups) + numways(skip, groups)
 
 
 def part1(s):
@@ -72,9 +58,7 @@ def part1(s):
         pattern, groupstr = line.split(' ')
         groups = tuple(map(int, groupstr.split(',')))
 
-        #print("===============================================================================")
         a = numways(pattern, groups)
-        #print(f"{a} - {pattern} {groups}")
         total += a
 
     return total
@@ -90,21 +74,20 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (21)")
     print(part1(ExampleInput1))
 
-    # 8452 is too high
     print()
-    print("Part 1")
+    print("Part 1 (7753)")
     print(part1(real_input()))
 
-    #print()
-    #print("Example Part 2")
-    #print(part2(ExampleInput1))
+    print()
+    print("Example Part 2")
+    print(part2(ExampleInput1))
 
-    #print()
-    #print("Part 2")
-    #print(part2(real_input()))
+    print()
+    print("Part 2")
+    print(part2(real_input()))
 
 
 if __name__ == "__main__":
