@@ -54,31 +54,21 @@ def numways(pattern, groups):
     return numways(place, groups) + numways(skip, groups)
 
 
-def part1(s):
-    total = 0
-    for lineno, line in enumerate(s.splitlines()):
+def parse(s):
+    entries = []
+    for line in s.splitlines():
         pattern, groupstr = line.split(' ')
         groups = tuple(map(int, groupstr.split(',')))
+        entries.append((pattern, groups))
+    return entries
 
-        a = numways(pattern, groups)
-        total += a
 
-    return total
+def part1(s):
+    return sum(numways(p,g) for p,g in parse(s))
 
 
 def part2(s):
-    total = 0
-    for lineno, line in enumerate(s.splitlines()):
-        pattern, groupstr = line.split(' ')
-        groups = tuple(map(int, groupstr.split(',')))
-
-        pattern = '?'.join([pattern]*5)
-        groups = groups * 5
-
-        a = numways(pattern, groups)
-        total += a
-
-    return total
+    return(sum(numways('?'.join([p]*5), g*5) for p,g in parse(s)))
 
 
 def real_input():
@@ -95,11 +85,11 @@ def run_all():
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (525152)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (280382734828319)")
     print(part2(real_input()))
 
 
