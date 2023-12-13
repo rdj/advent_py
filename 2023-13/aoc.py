@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from numpy import transpose
+
 ExampleInput1 = """\
 #.##..##.
 ..#.##.#.
@@ -20,8 +22,10 @@ ExampleInput1 = """\
 
 
 def parse(s):
-    blocks = s.split("\n\n")
-    return [_.splitlines() for _ in blocks]
+    blocks = []
+    for block in s.split("\n\n"):
+        blocks.append([list(line) for line in block.splitlines()])
+    return blocks
 
 
 def check_horz(tiles, mistakes_wanted=0):
@@ -44,22 +48,8 @@ def check_horz(tiles, mistakes_wanted=0):
 
 
 def check_vert(tiles, mistakes_wanted=0):
-    h = len(tiles)
-    w = len(tiles[0])
-    for mirror in range(1, w):
-        mistakes = 0
-        for ca, cb in zip(range(mirror - 1, -1, -1), range(mirror, w)):
-            for r in range(h):
-                if tiles[r][ca] != tiles[r][cb]:
-                    mistakes += 1
-                    if mistakes > mistakes_wanted:
-                        break
-            if mistakes > mistakes_wanted:
-              break
-        if mistakes == mistakes_wanted:
-            return mirror
-
-    return None
+    tiles = transpose(tiles).tolist()
+    return check_horz(tiles, mistakes_wanted)
 
 
 def part1(s):
@@ -102,15 +92,15 @@ def run_all():
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (29213)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (400)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (37453)")
     print(part2(real_input()))
 
 
