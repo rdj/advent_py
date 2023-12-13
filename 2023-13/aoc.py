@@ -54,7 +54,7 @@ def check_vert(tiles, mistakes_wanted=0):
 
 def do_it(s, mistakes_wanted):
     total = 0
-    for n, tiles in enumerate(parse(s)):
+    for tiles in parse(s):
         h = check_horz(tiles, mistakes_wanted)
         if h:
             total += 100 * h
