@@ -2,19 +2,18 @@
 
 from typing import NamedTuple
 
-# fuck backslashes so hard
-ExampleInput1 = """\
-.|...\\....
-|.-.\\.....
+ExampleInput1 = r"""
+.|...\....
+|.-.\.....
 .....|-...
 ........|.
 ..........
-.........\\
-..../.\\\\..
+.........\
+..../.\\..
 .-.-/..|..
-.|....-|.\\
+.|....-|.\
 ..//.|....
-"""
+""".strip()
 
 class Point(NamedTuple):
     x: int
@@ -107,13 +106,19 @@ INITIAL = (Point(0, 0), EAST,)
 
 
 def part1(s):
-    return do_it(s, INITIAL)
+    return do_it(parse(s), INITIAL)
 
 
 def do_it(s, start):
     tiles = parse(s)
+def do_it(tiles, start):
     assert len(tiles) == len(tiles[0]), f"{len(tiles)} != {len(tiles[0])}"
     size = len(tiles)
+
+    for y in range(size):
+        for x in range(size):
+            tiles[y][x].visits.clear()
+
     beams = [start]
     while beams:
         p, v = beams.pop()
@@ -136,15 +141,16 @@ def do_it(s, start):
 
 
 def part2(s):
-    size = len(s.splitlines())
+    tiles = parse(s)
+    size = len(tiles)
 
     vals = []
     for x in range(size):
-        vals.append(do_it(s, (Point(x, 0), SOUTH)))
-        vals.append(do_it(s, (Point(x, size - 1), NORTH)))
+        vals.append(do_it(tiles, (Point(x, 0), SOUTH)))
+        vals.append(do_it(tiles, (Point(x, size - 1), NORTH)))
     for y in range(size):
-        vals.append(do_it(s, (Point(0, y), EAST)))
-        vals.append(do_it(s, (Point(size - 1, y), WEST)))
+        vals.append(do_it(tiles, (Point(0, y), EAST)))
+        vals.append(do_it(tiles, (Point(size - 1, y), WEST)))
 
     return max(vals)
 
