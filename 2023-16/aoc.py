@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from multiprocessing import Pool
 from typing import NamedTuple
 
 ExampleInput1 = r"""
@@ -102,15 +103,10 @@ def parse(s):
     return tiles
 
 
-INITIAL = (Point(0, 0), EAST,)
-
-
 def part1(s):
-    return do_it(parse(s), INITIAL)
+    return do_it(parse(s), (Point(0, 0), EAST))
 
 
-def do_it(s, start):
-    tiles = parse(s)
 def do_it(tiles, start):
     assert len(tiles) == len(tiles[0]), f"{len(tiles)} != {len(tiles[0])}"
     size = len(tiles)
@@ -120,10 +116,12 @@ def do_it(tiles, start):
             tiles[y][x].visits.clear()
 
     beams = [start]
+    dupes = 0
     while beams:
         p, v = beams.pop()
         tile = tiles[p.y][p.x]
         if tile.is_dupe(v):
+            dupes +=1
             continue
         outs = tile.visit(v)
         for out in outs:
@@ -140,17 +138,27 @@ def do_it(tiles, start):
     return total
 
 
-def part2(s):
-    tiles = parse(s)
-    size = len(tiles)
+class Tiles:
+    def __init__(self, s):
+        self.tiles = parse(s)
 
-    vals = []
+    def run(self, beam):
+        return do_it(self.tiles, beam)
+
+def part2(s):
+    tiles = Tiles(s)
+    size = len(tiles.tiles)
+
+    initials = []
     for x in range(size):
-        vals.append(do_it(tiles, (Point(x, 0), SOUTH)))
-        vals.append(do_it(tiles, (Point(x, size - 1), NORTH)))
+        initials.append((Point(x, 0), SOUTH))
+        initials.append((Point(x, size - 1), NORTH))
     for y in range(size):
-        vals.append(do_it(tiles, (Point(0, y), EAST)))
-        vals.append(do_it(tiles, (Point(size - 1, y), WEST)))
+        initials.append((Point(0, y), EAST))
+        initials.append((Point(size - 1, y), WEST))
+
+    p = Pool(8)
+    vals = p.map(tiles.run, initials)
 
     return max(vals)
 
@@ -174,6 +182,8 @@ def run_all():
 
     print()
     print("Part 2 (7330)")
+    # import cProfile
+    # cProfile.run('print(part2(real_input()))')
     print(part2(real_input()))
 
 
