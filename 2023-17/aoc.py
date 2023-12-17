@@ -82,19 +82,11 @@ class Maze:
         visited = set()
 
         q = []
-        heappush(q, (0, 0, start, DOWN, 0))
-        heappush(q, (0, 0, start, RIGHT, 0))
-
-        # Heuristic cost for A-star is a best case _underestimate_ of the
-        # remaining distance to goal. For 99% of grid-based pathfinding, this
-        # is just going to be the manhattan distance. Leaving this comment
-        # because I *always* forget this and think this should be an upper
-        # rather than lower bound of the remaining cost.
-        def h(p):
-            return goal.manhattan(p)
+        heappush(q, (0, start, DOWN, 0))
+        heappush(q, (0, start, RIGHT, 0))
 
         while q:
-            _, cost, pos, facing, steps = heappop(q)
+            cost, pos, facing, steps = heappop(q)
             key = (pos, facing, steps)
 
             if key in visited:
@@ -126,7 +118,7 @@ class Maze:
                     continue
                 if newkey not in best_known or newcost < best_known[newkey]:
                     best_known[key] = cost
-                    heappush(q, (newcost + h(n), newcost, n, d, newsteps))
+                    heappush(q, (newcost, n, d, newsteps))
 
         raise Exception("goal not reached")
 
