@@ -71,16 +71,26 @@ class Maze:
         return (0 <= p.x < self.width and
                 0 <= p.y < self.height)
 
+    # Basically Dijkstra's, but no need to keep track of predecessors.
+    #
+    # https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
     def find_best_path(self, can_change_dir=0, must_change_dir=3):
         start = Point(0, 0)
         goal = Point(self.width - 1, self.height - 1)
 
+        # Graph nodes are (pos, facing, steps)
         best_known = {}
         best_known[(start, DOWN, 0)] = 0
         best_known[(start, RIGHT, 0)] = 0
 
         visited = set()
 
+        # Not using heuristic cost (A-star) since I can't think of anything
+        # more useful than manhattan distance, and that doesn't help. If you
+        # need A-star in future, just make h(state) + cost_so_far the first
+        # thing in the tuple for the heap. And don't forget that the heuristic
+        # cost is a best case _underestimate_ of the remaining cost to the
+        # goal.
         q = []
         heappush(q, (0, start, DOWN, 0))
         heappush(q, (0, start, RIGHT, 0))
