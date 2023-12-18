@@ -146,6 +146,9 @@ def perimeter(offsets):
 # boundary points.
 #  interior_points = area - boundary_points / 2 + 1
 #
+# Incidentally, one extra step yields my original formula for the solution:
+#  interior_points + boundary_points = area + boundary_points / 2 + 1
+#
 def compute_lava_squares(offsets):
     vertices = offsets_to_points(offsets)
     area = shoelace(vertices)
