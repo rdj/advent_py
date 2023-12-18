@@ -108,27 +108,58 @@ def shoelace(points):
 def perimeter(offsets):
     return sum(_[1] for _ in offsets)
 
-
-def part1(s):
-    offsets = decode1(s)
-    points = offsets_to_points(offsets)
-    return shoelace(points) + perimeter(offsets) // 2 + 1
-
-# Ok so we created a Simple Polygon:
+# The instructions draw a Simple Polygon:
 #   https://en.wikipedia.org/wiki/Simple_polygon
 #
-# So to calculate the area we need:
+# We can calculate the area with Shoelace:
 #   https://en.wikipedia.org/wiki/Shoelace_formula
 #
-# I should have guessed from all the clues in part 1 that we were going to need
-# to do something like this.
+# But just using shoelace is going to undercount the lava squares, which are
+# supposed to include the trench as well as the interior. Think about a simple
+# square case:
+#  ......
+#  .#####.  R 4   Vertices: (0, 0) (4, 0) (4, 4) (0, 4)
+#  .#####.  D 4   Shoelace: 16
+#  .#####.  L 4   Lava Squares: 25
+#  .#####.  U 4
+#  .#####.
+#  .......
 #
-# The formula is going to undercount because it essentially doesn't count half
-# the edge, so we'll need to add that back in.
+# So it looks like about half of the exterior points get left out, because the
+# point "x, y" is just the lower left corner of that square of area in normal
+# cartesian coordinates, and we're working with weird integer-sized squares.
+#
+# Originally, I just intuitively added on half the perimeter, and that was off
+# by one, so I slapped +1 on there, got the solutions and moved on.
+#
+# But it was bugging me, so I went back and read more of the Wikipedia page for
+# Simple Polygon. Right there next to Shoelace it talks about Pick's Theorem:
+#   https://en.wikipedia.org/wiki/Pick%27s_theoremformula
+#
+# Pick's theorem, which only works for integer coorindates (hint hint), defines
+# a relationship between the area, interior integer points, and exterior
+# integer points, usually expressed in terms of the Area:
+#   area = interior_points + boundary_points / 2 - 1
+#
+# We know the area and can count the boundary_points, so we can solve for the
+# interior points, and our puzzle solution is the sum of the interior and
+# boundary points.
+#  interior_points = area - boundary_points / 2 + 1
+#
+def compute_lava_squares(offsets):
+    vertices = offsets_to_points(offsets)
+    area = shoelace(vertices)
+    boundary_points = perimeter(offsets)
+    interior_points = area - boundary_points // 2 + 1
+    return boundary_points + interior_points
+
+def part1(s):
+    return compute_lava_squares(decode1(s))
+
+
 def part2(s):
-    offsets = decode2(s)
-    points = offsets_to_points(offsets)
-    return shoelace(points) + perimeter(offsets) // 2 + 1
+    return compute_lava_squares(decode2(s))
+
 
 def real_input():
     with open("input.txt", "r") as infile:
