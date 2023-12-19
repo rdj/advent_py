@@ -81,17 +81,11 @@ class Workflows:
             num = int(step[2:])
 
             inrange = xmas[var]
-            assert(num in inrange)
-
             xmas2 = xmas.copy()
             if op == '<':
-                xmas2[var] = range(inrange[0], num)
-                xmas[var] = range(num, inrange.stop)
+                xmas2[var], xmas[var] = split_range(inrange, num)
             else:
-                xmas2[var] = range(num + 1, inrange.stop)
-                xmas[var] = range(inrange[0], num + 1)
-
-            assert len(inrange) == len(xmas[var]) + len(xmas2[var])
+                xmas[var], xmas2[var] = split_range(inrange, num + 1)
 
             self.find_accepted_ranges(xmas2, out)
 
@@ -110,6 +104,13 @@ def count_xmas(xmas):
 
 def everything_xmas():
     return {k: range(1, 4001) for k in 'xmas'}
+
+
+def split_range(r, split):
+    assert split in r
+    result = (range(r[0], split), range(split, r.stop))
+    assert len(r) == len(result[0]) + len(result[1])
+    return result
 
 
 def parse_parts(s):
