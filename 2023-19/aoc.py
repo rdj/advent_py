@@ -28,8 +28,6 @@ hdj{m>838:A,pv}
 class Workflows:
     def __init__(self, s):
         self.flows = {}
-        self.accepted = []
-        self.rejected = []
         for line in s.splitlines():
             if line == "":
                 break
@@ -59,11 +57,6 @@ class Workflows:
                 return self.run(p, out)
         raise Exception("Ran out of steps")
 
-    def part2(self):
-        xmas = {k: (0, 4001) for k in 'xmas'}
-        ranges = self.find_accepted_ranges(xmas, 'in')
-        return sum(count_xmas(_) for _ in self.accepted)
-
     def find_accepted_ranges(self, xmas, name):
         if name == 'A':
             self.accepted.append(xmas)
@@ -84,29 +77,35 @@ class Workflows:
             num = int(step[2:])
 
             inrange = xmas[var]
-            assert(inrange[0] <= num <= inrange[1])
+            assert(num in inrange)
 
             xmas2 = xmas.copy()
             if op == '<':
-                xmas2[var] = (inrange[0], num)
-                xmas[var] = (num - 1, inrange[1])
+                xmas2[var] = range(inrange[0], num)
+                xmas[var] = range(num, inrange.stop)
             else:
-                xmas2[var] = (num, inrange[1])
-                xmas[var] = (inrange[0], num + 1)
+                xmas2[var] = range(num + 1, inrange.stop)
+                xmas[var] = range(inrange[0], num + 1)
 
-            assert rangelen(inrange) == rangelen(xmas2[var]) + rangelen(xmas[var])
+            assert len(inrange) == len(xmas[var]) + len(xmas2[var])
 
             self.find_accepted_ranges(xmas2, out)
 
         raise Exception("Did not accept or reject")
 
-
-def rangelen(r):
-    return r[1] - r[0] - 1
+    def total_accepted_combinations(self):
+        self.accepted = []
+        self.rejected = []
+        ranges = self.find_accepted_ranges(everything_xmas(), 'in')
+        return sum(count_xmas(_) for _ in self.accepted)
 
 
 def count_xmas(xmas):
-    return prod(rangelen(r) for r in xmas.values())
+    return prod(len(r) for r in xmas.values())
+
+
+def everything_xmas():
+    return {k: range(1, 4001) for k in 'xmas'}
 
 
 def parse_parts(s):
@@ -134,7 +133,7 @@ def part1(s):
 
 
 def part2(s):
-    return Workflows(s).part2()
+    return Workflows(s).total_accepted_combinations()
 
 
 def real_input():
