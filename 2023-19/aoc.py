@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from colors import color
+from math import prod
 
 
 ExampleInput1 = """\
@@ -93,17 +94,19 @@ class Workflows:
                 xmas2[var] = (num, inrange[1])
                 xmas[var] = (inrange[0], num + 1)
 
+            assert rangelen(inrange) == rangelen(xmas2[var]) + rangelen(xmas[var])
+
             self.find_accepted_ranges(xmas2, out)
 
         raise Exception("Did not accept or reject")
 
 
+def rangelen(r):
+    return r[1] - r[0] - 1
+
+
 def count_xmas(xmas):
-    kprod = 1
-    for k in 'xmas':
-        r = xmas[k]
-        kprod *= r[1] - r[0] - 1
-    return kprod
+    return prod(rangelen(r) for r in xmas.values())
 
 
 def parse_parts(s):
@@ -140,19 +143,19 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (19114)")
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (350678)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (167409079868000)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (124831893423809)")
     print(part2(real_input()))
 
 
