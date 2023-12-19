@@ -2,6 +2,7 @@
 
 from colors import color
 from math import prod
+import operator as op
 
 
 ExampleInput1 = """\
@@ -24,6 +25,10 @@ hdj{m>838:A,pv}
 {x=2127,m=1623,a=2188,s=1013}
 """
 
+OPS = {
+    '<': op.lt,
+    '>': op.gt
+}
 
 class Workflows:
     def __init__(self, s):
@@ -49,11 +54,10 @@ class Workflows:
             step, out = step.split(':')
 
             var = step[0]
-            op = step[1]
+            op = OPS[step[1]]
             num = int(step[2:])
 
-            result = (p[var] < num if op == '<' else p[var] > num)
-            if result:
+            if op(p[var], num):
                 return self.run(p, out)
         raise Exception("Ran out of steps")
 
