@@ -110,17 +110,9 @@ class PulseNetwork:
 
 def part1(s):
     pn = PulseNetwork(s)
-    states = [pn.state()]
-    n = 0
     for _ in range(1000):
-        n += 1
         pn.push_button()
-        state = pn.state()
-        if state in states:
-            break
-
-    repeats = 1000 // n
-    return pn.high_count * repeats * pn.low_count * repeats
+    return pn.high_count * pn.low_count
 
 
 def part2(s):
