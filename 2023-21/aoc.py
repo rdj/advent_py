@@ -205,15 +205,22 @@ def part2(s, step_count=26501365):
         edges *= 4
         print(f"{edges=} {edge_age=}")
 
+        newage = edge_age
         while edges > 0 and edge_age < big_enough_edge:
+            #print(f"{edges=} {edge_age=}")
             for s in ((Point(start.x, 0), Point(start.x, size - 1), Point(0, start.y), Point(size - 1, start.y))):
                 edges_result += count_destinations(maze, edge_age, s)
             edges -= 4
             edge_age += size
 
+        # this should have a closed form
         if edges > 0:
-            print(f"Edge interiors {edges=} {edge_odd=} {edge_even=} {step_count=}")
-        edges_result += edges * (edge_odd if edge_age % 2 else edge_even)
+            print(f"Interior {edges=}")
+        while edges > 0:
+            edges_result += 4 * (edge_odd if edge_age % 2 else edge_even)
+            edges -= 4
+            edge_age += size
+
 
     corners = 0
     corners_result = 0
@@ -224,16 +231,22 @@ def part2(s, step_count=26501365):
         print(f"{corners=} {diagonal_length=} {corner_age=}")
 
         while corners > 0 and corner_age < big_enough_corner:
+            #print(f"{corners=} {corner_age=}")
             for s in (Point(0, 0), Point(0, size - 1), Point(size - 1, 0), Point(size - 1, size - 1)):
                 corners_result += diagonal_length * count_destinations(maze, corner_age, s)
             corners -= diagonal_length * 4
             diagonal_length -= 1
             corner_age += size
 
+        # this should have a closed form
         if corners > 0:
-            print(f"Corner interiors {corners=} {corner_odd=} {corner_even=} {step_count=}")
-        corners_result += corners * (corner_odd if corner_age % 2 else corner_even)
+            print(f"Interior {corners=}")
+        while corners > 0:
+            corners_result += 4 * diagonal_length * (corner_odd if corner_age % 2 else corner_even)
 
+            corners -= diagonal_length * 4
+            diagonal_length -= 1
+            corner_age += size
 
     result = center_result + edges_result + corners_result
 
@@ -241,6 +254,7 @@ def part2(s, step_count=26501365):
 
     # 590782959877036 is too low
     # 590800516088076 is wrong
+    # 594606492802848
     # 1181589207387618 is too high
     return result
 
@@ -265,17 +279,17 @@ def run_all():
     #     print(f"{a} -> {b}")
     #     print(part2(ExampleInput1, a))
 
-    for n in range(208, 211):
+    for n in range(269, 271):
         comp = part2(ExampleRDJ, n)
         sim = part1(ExampleRDJ, n, True)
-        fg = None
+        fg = 'green'
         if comp != sim:
             fg = 'red'
-        print(color(f"RDJ {n} : Computed {comp} Simulated {sim}", fg))
+        print(color(f"RDJ {n} : Computed {comp} Simulated {sim} {comp - sim = }", fg))
 
-    # print()
-    # print("Part 2")
-    # print(part2(real_input()))
+    print()
+    print("Part 2 (594606492802848)")
+    print(part2(real_input()))
 
 
 if __name__ == "__main__":
