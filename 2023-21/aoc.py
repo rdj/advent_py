@@ -85,6 +85,7 @@ class Maze:
         return tuple(nlist)
 
 
+@ft.cache
 def count_destinations(s_or_maze, target_steps=64, start=None):
     maze = s_or_maze
     if not isinstance(maze, Maze):
@@ -188,7 +189,7 @@ def part2(s, step_count=26501365):
     #
     # center start: 1
     # edge-start:   4 * ((n + 2) // 5) if n > 2
-    # corner-start: 4 * x * (x + 1) / 2 where x = (n - 1) // 5 if n > 5  (4 * sum of first x integers)
+    # corner-start: 4 * x * (x + 1) / 2 where x = (n - 1) // 5 if n > 5  (i.e. 4 * sum of first x integers)
 
     centers = 1
     center_result = None
@@ -203,19 +204,15 @@ def part2(s, step_count=26501365):
     if step_count > d_first_edge:
         edges, edge_age  = divmod((step_count + d_first_edge), size)
         edges *= 4
-        print(f"{edges=} {edge_age=}")
 
         newage = edge_age
         while edges > 0 and edge_age < big_enough_edge:
-            #print(f"{edges=} {edge_age=}")
             for s in ((Point(start.x, 0), Point(start.x, size - 1), Point(0, start.y), Point(size - 1, start.y))):
                 edges_result += count_destinations(maze, edge_age, s)
             edges -= 4
             edge_age += size
 
-        # this should have a closed form
-        if edges > 0:
-            print(f"Interior {edges=}")
+        # this should really have a closed form but it runs fast
         while edges > 0:
             edges_result += 4 * (edge_odd if edge_age % 2 else edge_even)
             edges -= 4
@@ -226,21 +223,17 @@ def part2(s, step_count=26501365):
     corners_result = 0
     if step_count > size:
         diagonal_length, corner_age = divmod((step_count - 1), size)
-        corners = diagonal_length * (diagonal_length + 1) // 2
+        corners = sum(range(diagonal_length))
         corners *= 4
-        print(f"{corners=} {diagonal_length=} {corner_age=}")
 
         while corners > 0 and corner_age < big_enough_corner:
-            #print(f"{corners=} {corner_age=}")
             for s in (Point(0, 0), Point(0, size - 1), Point(size - 1, 0), Point(size - 1, size - 1)):
                 corners_result += diagonal_length * count_destinations(maze, corner_age, s)
             corners -= diagonal_length * 4
             diagonal_length -= 1
             corner_age += size
 
-        # this should have a closed form
-        if corners > 0:
-            print(f"Interior {corners=}")
+        # this should really have a closed form but it runs fast
         while corners > 0:
             corners_result += 4 * diagonal_length * (corner_odd if corner_age % 2 else corner_even)
 
@@ -250,12 +243,6 @@ def part2(s, step_count=26501365):
 
     result = center_result + edges_result + corners_result
 
-    print(result, "=", center_result, "(center) +", edges_result, "(edges) +", corners_result, "(corners)")
-
-    # 590782959877036 is too low
-    # 590800516088076 is wrong
-    # 594606492802848
-    # 1181589207387618 is too high
     return result
 
 
@@ -279,13 +266,17 @@ def run_all():
     #     print(f"{a} -> {b}")
     #     print(part2(ExampleInput1, a))
 
-    for n in range(269, 271):
-        comp = part2(ExampleRDJ, n)
-        sim = part1(ExampleRDJ, n, True)
-        fg = 'green'
-        if comp != sim:
-            fg = 'red'
-        print(color(f"RDJ {n} : Computed {comp} Simulated {sim} {comp - sim = }", fg))
+    # I had luck creating a small board, simulating the result, and comparing
+    # it to my computation. I had a lot of little bugs I had to find, so this
+    # was super helpful since their example wasn't.
+    #
+    # for n in range(269, 271):
+    #     comp = part2(ExampleRDJ, n)
+    #     sim = part1(ExampleRDJ, n, True)
+    #     fg = 'green'
+    #     if comp != sim:
+    #         fg = 'red'
+    #     print(color(f"RDJ {n} : Computed {comp} Simulated {sim} {comp - sim = }", fg))
 
     print()
     print("Part 2 (594606492802848)")
