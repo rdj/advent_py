@@ -22,12 +22,12 @@ ExampleInput1 = """\
 
 ExampleRDJ = """\
 .........
+.#.......
+......#..
 .........
-...#..#..
-...#.#...
 ....S....
-...#.#...
-..#......
+.........
+.##......
 .........
 .........
 """
@@ -191,9 +191,11 @@ def part2(s, step_count=26501365):
     # corner-start: 4 * x * (x + 1) / 2 where x = (n - 1) // 5 if n > 5  (4 * sum of first x integers)
 
     centers = 1
-    center_result = center_odd if step_count % 2 else center_even
+    center_result = None
     if step_count < big_enough_center:
         center_result = count_destinations(maze, step_count)
+    else:
+        center_result = center_odd if step_count % 2 else center_even
 
     edges = 0
     edges_result = 0
@@ -201,7 +203,7 @@ def part2(s, step_count=26501365):
     if step_count > d_first_edge:
         edges, edge_age  = divmod((step_count + d_first_edge), size)
         edges *= 4
-        #print(f"{edges=} {edge_age=}")
+        print(f"{edges=} {edge_age=}")
 
         while edges > 0 and edge_age < big_enough_edge:
             for s in ((Point(start.x, 0), Point(start.x, size - 1), Point(0, start.y), Point(size - 1, start.y))):
@@ -209,7 +211,9 @@ def part2(s, step_count=26501365):
             edges -= 4
             edge_age += size
 
-        edges_result += edges * (edge_odd if step_count % 2 else edge_even)
+        if edges > 0:
+            print(f"Edge interiors {edges=} {edge_odd=} {edge_even=} {step_count=}")
+        edges_result += edges * (edge_odd if edge_age % 2 else edge_even)
 
     corners = 0
     corners_result = 0
@@ -226,7 +230,9 @@ def part2(s, step_count=26501365):
             diagonal_length -= 1
             corner_age += size
 
-        corners_result += corners * (corner_odd if step_count % 2 else corner_even)
+        if corners > 0:
+            print(f"Corner interiors {corners=} {corner_odd=} {corner_even=} {step_count=}")
+        corners_result += corners * (corner_odd if corner_age % 2 else corner_even)
 
 
     result = center_result + edges_result + corners_result
@@ -259,7 +265,7 @@ def run_all():
     #     print(f"{a} -> {b}")
     #     print(part2(ExampleInput1, a))
 
-    for n in range(198, 205):
+    for n in range(208, 211):
         comp = part2(ExampleRDJ, n)
         sim = part1(ExampleRDJ, n, True)
         fg = None
