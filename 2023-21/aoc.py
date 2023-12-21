@@ -56,10 +56,9 @@ def do_part1(s, target_steps=64):
         dst = set()
         for p in src:
             for n in p.neighbors():
-                if not (0 <= n.y < h and
-                        0 <= n.x < w):
-                    continue
-                if maze[n.y][n.x] != '#':
+                if (0 <= n.y < h and
+                    0 <= n.x < w and
+                    maze[n.y][n.x] != '#'):
                     dst.add(n)
         src = dst
 
