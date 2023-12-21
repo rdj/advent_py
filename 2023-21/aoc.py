@@ -278,6 +278,18 @@ def run_all():
     #         fg = 'red'
     #     print(color(f"RDJ {n} : Computed {comp} Simulated {sim} {comp - sim = }", fg))
 
+    # size = len(real_input().splitlines())
+    # initial = size // 2
+    # for n in (initial, initial + size, initial + 2 * size):
+    #     print(f"{n=}", part1(real_input(), n, True))
+    # you can use wolfram alpha to perfect fit a quadratic to those parameters:
+    # https://www.wolframalpha.com/input?i=quadratic+fit+%7B65%2C+3648%7D%2C+%7B196%2C+32781%7D%2C+%7B327%2C+90972%7D
+    # and then just have a closed form solution to the whole thing:
+    x = 26501365
+    print()
+    print("Part 2 but math")
+    print(int((14529*x*x)/17161 + (24354*x)/17161 - 364707/17161))
+
     print()
     print("Part 2 (594606492802848)")
     print(part2(real_input()))
