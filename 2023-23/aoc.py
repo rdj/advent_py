@@ -134,7 +134,7 @@ class Maze:
         nodes.add(self.start)
         return nodes, segments
 
-    def find_best_path2(self):
+    def build_edges(self):
         nodes, segments = self.build_graph()
 
         edges = {n: {} for n in nodes}
@@ -143,7 +143,11 @@ class Maze:
             cost = len(s) - 1
             edges[a][b] = cost
             edges[b][a] = cost
+        return edges
 
+
+    def find_best_path2(self):
+        edges = self.build_edges()
         partials = [[self.start]]
         completes = []
 
@@ -215,3 +219,4 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
+
