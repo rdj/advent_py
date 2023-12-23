@@ -2,6 +2,7 @@
 
 from colors import color
 from heapq import heappush, heappop
+import itertools as it
 from typing import NamedTuple
 
 ExampleInput1 = """\
@@ -99,22 +100,95 @@ class Maze:
         completes.sort(key=lambda p: len(p))
         return completes[-1]
 
+    def build_graph(self):
+        partials = [[self.start]]
+        segments = []
+        nodes = set()
+        nodes.add(self.goal)
+
+        while partials:
+            path = partials.pop()
+            pos = path[-1]
+
+            if pos in nodes:
+                segments.append(path)
+                continue
+
+            neighbors = [n for n in pos.neighbors() if self.tiles[n.y][n.x] != '#' and n not in path]
+            match len(neighbors):
+                case 0:
+                    print(f"{pos=}")
+                    print(f"{path=}")
+                    print(f"{segments=}")
+                    print(f"{visited=}")
+                    raise Exception(f"dead end")
+                case 1:
+                    path.append(neighbors[0])
+                    partials.append(path)
+                case _:
+                    nodes.add(pos)
+                    segments.append(path)
+                    for n in neighbors:
+                        partials.append([pos, n])
+
+        nodes.add(self.start)
+        return nodes, segments
+
+    def find_best_path2(self):
+        nodes, segments = self.build_graph()
+
+        edges = {n: {} for n in nodes}
+        for s in segments:
+            a, b = s[0], s[-1]
+            cost = len(s) - 1
+            edges[a][b] = cost
+            edges[b][a] = cost
+
+        partials = [[self.start]]
+        completes = []
+
+        while partials:
+            path = partials.pop()
+            pos = path[-1]
+
+            if pos == self.goal:
+                completes.append(path)
+                continue
+
+            neighbors = edges[pos].keys()
+            for n in neighbors:
+                if n in path:
+                    continue
+                partials.append(path + [n])
+
+        costs = []
+        for s in completes:
+            cost = 0
+            for a, b in it.pairwise(s):
+                cost += edges[a][b]
+            costs.append(cost)
+
+        costs.sort()
+        return costs[-1]
+
+
 
 def part1(s):
     maze = Maze(s)
     path = maze.find_best_path()
-    for y in range(maze.height):
-        for x in range(maze.width):
-            if Point(x, y) in path:
-                print(color('O', '#ff0000'), end='')
-            else:
-                print(maze.tiles[y][x], end='')
-        print()
+    # for y in range(maze.height):
+    #     for x in range(maze.width):
+    #         if Point(x, y) in path:
+    #             print(color('O', '#ff0000'), end='')
+    #         else:
+    #             print(maze.tiles[y][x], end='')
+    #     print()
     return len(path) - 1
 
 
 def part2(s):
-    return "TODO"
+    maze = Maze(s)
+    return maze.find_best_path2()
 
 
 def real_input():
@@ -123,19 +197,19 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (94)")
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (2318)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (154)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (6426)")
     print(part2(real_input()))
 
 
