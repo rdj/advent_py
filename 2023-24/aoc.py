@@ -122,8 +122,33 @@ def part1(s):
 
 
 def part2(s):
-    return "TODO"
+    objects = parse(s)
+    for a, b, c in it.combinations(objects, 3):
+        p, v, t = sympy.symbols('p v t')
+        base_eq = p + v * t
 
+        x, y, z = sympy.symbols('x, y, z')
+        v_x, v_y, v_z = sympy.symbols('v_x, v_y, v_z')
+        t_0, t_1, t_2 = sympy.symbols('t_0, t_1, t_2', nonnegative=True)
+        unknowns = (x, y, z, v_x, v_y, v_z, t_0, t_1, t_2)
+
+        eqs = [
+            base_eq.subs(((p, a[0][0]), (v, a[1][0]), (t, t_0))) - base_eq.subs(((p, x), (v, v_x), (t, t_0))),
+            base_eq.subs(((p, a[0][1]), (v, a[1][1]), (t, t_0))) - base_eq.subs(((p, y), (v, v_y), (t, t_0))),
+            base_eq.subs(((p, a[0][2]), (v, a[1][2]), (t, t_0))) - base_eq.subs(((p, z), (v, v_z), (t, t_0))),
+            base_eq.subs(((p, b[0][0]), (v, b[1][0]), (t, t_1))) - base_eq.subs(((p, x), (v, v_x), (t, t_1))),
+            base_eq.subs(((p, b[0][1]), (v, b[1][1]), (t, t_1))) - base_eq.subs(((p, y), (v, v_y), (t, t_1))),
+            base_eq.subs(((p, b[0][2]), (v, b[1][2]), (t, t_1))) - base_eq.subs(((p, z), (v, v_z), (t, t_1))),
+            base_eq.subs(((p, c[0][0]), (v, c[1][0]), (t, t_2))) - base_eq.subs(((p, x), (v, v_x), (t, t_2))),
+            base_eq.subs(((p, c[0][1]), (v, c[1][1]), (t, t_2))) - base_eq.subs(((p, y), (v, v_y), (t, t_2))),
+            base_eq.subs(((p, c[0][2]), (v, c[1][2]), (t, t_2))) - base_eq.subs(((p, z), (v, v_z), (t, t_2))),
+        ]
+
+        vals = sympy.solve(eqs, unknowns)
+        if 1 == len(vals):
+            vals = dict(zip(unknowns, vals[0]))
+            return int(vals[x] + vals[y] + vals[z])
+    raise Exception("No solution found")
 
 def real_input():
     with open("input.txt", "r") as infile:
