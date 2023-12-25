@@ -118,7 +118,6 @@ def count_pairwise_xy_path_intersections(objects, test_range):
 def part1(s):
     objects = parse(s)
     return count_pairwise_xy_path_intersections(objects, range(200000000000000, 400000000000001))
-    return "TODO"
 
 
 def part2(s):
