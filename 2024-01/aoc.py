@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from colors import color
-from collections import defaultdict
+from collections import Counter
 import re
 
 
@@ -28,10 +28,7 @@ def part2(s):
     pairs = [[int(_) for _ in re.split(r'\D+', line)] for line in s.splitlines()]
     col1, col2 = zip(*pairs)
 
-    counts = defaultdict(lambda: 0)
-    for n in col2:
-        counts[n] += 1
-
+    counts = Counter(col2)
     scores = [n * counts[n] for n in col1]
 
     return sum(scores)
@@ -43,19 +40,19 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (11)")
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (1580061)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (31)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (23046913)")
     print(part2(real_input()))
 
 
