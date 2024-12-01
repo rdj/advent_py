@@ -2,7 +2,6 @@
 
 from colors import color
 from collections import Counter
-import re
 
 
 ExampleInput1 = """\
@@ -16,7 +15,7 @@ ExampleInput1 = """\
 
 
 def part1(s):
-    pairs = [[int(_) for _ in re.split(r'\D+', line)] for line in s.splitlines()]
+    pairs = [[int(_) for _ in line.split()] for line in s.splitlines()]
     cols = zip(*pairs)
     cols = [sorted(_) for _ in cols]
     pairs = zip(*cols)
@@ -25,7 +24,7 @@ def part1(s):
 
 
 def part2(s):
-    pairs = [[int(_) for _ in re.split(r'\D+', line)] for line in s.splitlines()]
+    pairs = [[int(_) for _ in line.split()] for line in s.splitlines()]
     col1, col2 = zip(*pairs)
 
     counts = Counter(col2)
