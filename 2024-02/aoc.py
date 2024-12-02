@@ -15,8 +15,9 @@ ExampleInput1 = """\
 def parse(s):
     return [[int(_) for _ in line.split()] for line in s.splitlines()]
 
+
 def is_good(nums):
-    d = [w[0] - w[1] for w in sliding_window(nums, 2)]
+    d = [a - b for a, b in sliding_window(nums, 2)]
 
     if d[0] == 0:
         return False
