@@ -53,7 +53,7 @@ def part1(s):
 
 def part2(s):
     s = s + "do()"
-    s = re.sub(r"don't\(\).*?do\(\)", "", s, flags=re.DOTALL)
+    s = re.sub(r"(?s:don't\(\).*?do\(\))", "", s)
     return part1(s)
 
 
