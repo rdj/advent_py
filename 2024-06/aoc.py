@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-from typing import NamedTuple
+#!/usr/bin/env pypy3
 
 
 ExampleInput1 = """\
@@ -16,63 +14,47 @@ ExampleInput1 = """\
 ......#...
 """
 
-class Point(NamedTuple):
-    x: int
-    y: int
+N = (0, -1)
+E = (1, 0)
+S = (0, 1)
+W = (-1, 0)
 
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
-
-    def __sub__(self, other):
-        return Point(self.x - other.x, self.y - other.y)
-
-    def __repr__(self):
-        return f"({self.x}, {self.y})"
-
-
-N = Point(0, -1)
-E = Point(1, 0)
-S = Point(0, 1)
-W = Point(-1, 0)
-
-DIRECTIONS = [N, E, S, W]
+DIRS = [N, E, S, W]
 FACING = ['^', '>', 'v', '<']
 
 
 class Grid:
     def __init__(self, s):
-        self.tiles = [list(_) for _ in s.splitlines()]
+        self.tiles = [list('~' + _ + '~') for _ in s.splitlines()]
+        outside = '~' * len(self.tiles[0])
+        self.tiles = [outside] + self.tiles + [outside]
+
         self.height = len(self.tiles)
         self.width = len(self.tiles[0])
-
-    def in_bounds(self, p):
-        return (0 <= p.x < self.width and
-                0 <= p.y < self.height)
+        self.start = self.find_start()
 
     def points(self):
-        return (Point(x, y) for x in range(self.width) for y in range(self.height))
+        return ((x, y) for x in range(self.width) for y in range(self.height))
 
     def find_start(self):
-        for p in self.points():
-            t = self.tiles[p.y][p.x]
+        for x,y in self.points():
+            t = self.tiles[y][x]
             if t in FACING:
-                return p, FACING.index(t)
+                return (x, y), FACING.index(t)
         raise Exception()
 
     def find_path(self):
-        start, facing = self.find_start()
-
-        p = start
-        d = DIRECTIONS[facing]
+        p, d = self.start
         visited = set()
         while True:
             visited.add((p, d))
-            dst = p + d
-            if not self.in_bounds(dst):
-                break
+            dx, dy = DIRS[d]
+            dst = (p[0] + dx, p[1] + dy)
             if (dst, d) in visited:
                 return None
-            t = self.tiles[dst.y][dst.x]
+            t = self.tiles[dst[1]][dst[0]]
+            if t == '~':
+                break
             if t == '#':
                 d = turn90(d)
                 continue
@@ -82,7 +64,7 @@ class Grid:
 
 
 def turn90(d):
-    return DIRECTIONS[(DIRECTIONS.index(d) + 1) % len(DIRECTIONS)]
+    return (d + 1) % len(DIRS)
 
 
 def part1(s):
@@ -98,12 +80,12 @@ def part2(s):
     uniqs = set(_[0] for _ in path)
 
     loops = 0
-    for p in uniqs:
-        if g.tiles[p.y][p.x] == '.':
-            g.tiles[p.y][p.x] = '#'
+    for x, y in uniqs:
+        if g.tiles[y][x] == '.':
+            g.tiles[y][x] = '#'
             if g.find_path() == None:
                 loops += 1
-            g.tiles[p.y][p.x] = '.'
+            g.tiles[y][x] = '.'
 
     return loops
 
@@ -131,4 +113,5 @@ def run_all():
 
 
 if __name__ == "__main__":
+    #cProfile.run('run_all()', sort='cumulative')
     run_all()
