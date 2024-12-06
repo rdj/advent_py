@@ -68,16 +68,18 @@ class Grid:
             return False
         return self.tiles[start.y][start.x] == word[0] and self.is_word(word[1:], start + direction, direction)
 
+    def points(self):
+        return (Point(x, y) for x in range(self.width) for y in range(self.height))
+
 
 def part1(s):
     g = Grid(s)
 
     count = 0
-    for y in range(g.height):
-        for x in range(g.width):
-            for d in DIRECTIONS:
-                if g.is_xmas(Point(x, y), d):
-                    count += 1
+    for p in g.points():
+        for d in DIRECTIONS:
+            if g.is_xmas(p, d):
+                count += 1
     return count
 
 
@@ -85,14 +87,13 @@ def part2(s):
     g = Grid(s)
 
     centers = defaultdict(list)
-    for y in range(g.height):
-        for x in range(g.width):
-            for d in INTERCARDS:
-                start = Point(x, y)
-                if g.is_mas(start, d):
-                    centers[start + d].append(d)
 
-    return len([_ for _ in centers.values() if len(_) == 2])
+    for p in g.points():
+        for d in INTERCARDS:
+            if g.is_mas(p, d):
+                centers[p + d].append(d)
+
+    return sum(1 for _ in centers.values() if len(_) == 2)
 
 
 def real_input():
