@@ -48,24 +48,13 @@ def parse(s):
     return ants, lambda p: 0 <= p.x < width and 0 <= p.y < height
 
 
-def part1(s):
-    nodes, in_bounds = parse(s)
-    antis = set()
-    for f, coords in nodes.items():
-        for a, b in combinations(coords, 2):
-            antis.add(a + a - b)
-            antis.add(b + b - a)
-
-    return sum(1 for p in antis if in_bounds(p))
-
-
-def part2(s):
+def count_antinodes(s, limit):
     nodes, in_bounds = parse(s)
     antis = set()
 
     def add_points(start, delta):
         cur = start
-        while True:
+        for _ in range(limit):
             antis.add(cur)
             cur += delta
             if not in_bounds(cur):
@@ -77,6 +66,14 @@ def part2(s):
             add_points(b, b - a)
 
     return len(antis)
+
+
+def part1(s):
+    return count_antinodes(s, 1)
+
+
+def part2(s):
+    return count_antinodes(s, 2**32)
 
 
 def real_input():
