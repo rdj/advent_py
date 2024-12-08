@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from itertools import combinations
+from typing import NamedTuple
 
 
 ExampleInput1 = """\
@@ -19,59 +20,63 @@ ExampleInput1 = """\
 ............
 """
 
-def find_antennas(grid):
+class Point(NamedTuple):
+    x: int
+    y: int
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __repr__(self):
+        return f"({self.x}, {self.y})"
+
+
+def parse(s):
     ants = defaultdict(list)
-    for y in range(len(grid)):
-        for x in range(len(grid[0])):
+    grid = s.splitlines()
+    width, height = len(grid[0]), len(grid)
+    for y in range(height):
+        for x in range(width):
             match grid[y][x]:
                 case '.':
                     continue
                 case f:
-                    ants[f].append((x, y))
-    return ants
+                    ants[f].append(Point(x, y))
+    return ants, lambda p: 0 <= p.x < width and 0 <= p.y < height
 
 
 def part1(s):
-    g = s.splitlines()
-    w, h = len(g[0]), len(g)
-    nodes = find_antennas(g)
+    nodes, in_bounds = parse(s)
     antis = set()
     for f, coords in nodes.items():
         for a, b in combinations(coords, 2):
-            dx = b[0] - a[0]
-            dy = b[1] - a[1]
-            antis.add((a[0] - dx, a[1] - dy))
-            antis.add((b[0] + dx, b[1] + dy))
+            antis.add(a + a - b)
+            antis.add(b + b - a)
 
-    return sum(1 for p in antis if 0 <= p[0] < w and 0 <= p[1] < h)
+    return sum(1 for p in antis if in_bounds(p))
 
 
 def part2(s):
-    g = s.splitlines()
-    w, h = len(g[0]), len(g)
-    in_bounds = lambda p: 0 <= p[0] < w and 0 <= p[1] < h
-    nodes = find_antennas(g)
+    nodes, in_bounds = parse(s)
     antis = set()
+
+    def add_points(start, delta):
+        cur = start
+        while True:
+            antis.add(cur)
+            cur += delta
+            if not in_bounds(cur):
+                break
+
     for f, coords in nodes.items():
         for a, b in combinations(coords, 2):
-            dx = b[0] - a[0]
-            dy = b[1] - a[1]
+            add_points(a, a - b)
+            add_points(b, b - a)
 
-            cur = a
-            while True:
-                antis.add(cur)
-                cur = (cur[0] - dx, cur[1] - dy)
-                if not in_bounds(cur):
-                    break
-
-            cur = b
-            while True:
-                antis.add(cur)
-                cur = (cur[0] + dx, cur[1] + dy)
-                if not in_bounds(cur):
-                    break
-
-    return sum(1 for _ in antis)
+    return len(antis)
 
 
 def real_input():
