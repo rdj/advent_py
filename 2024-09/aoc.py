@@ -1,45 +1,13 @@
 #!/usr/bin/env pypy3
 
-## Things I used in previous years
-
-# from colors import color  ## pip install py-colors
-# from collections import Counter
-# from collections import defaultdict
-# from collections import deque
-# from colors import color
-# from enum import Enum
-# from fractions import Fraction
-# from functools import cached_property
-# from functools import lru_cache
-# from functools import reduce
-# from functools import reduce, partial
-# from heapq import heappush, heappop
-# from itertools import pairwise
-# from math import prod
-# from more_itertools import chunked, sliding_window
-# from multiprocessing import Pool
-# from numpy import transpose
-# from operator import mul
-# from pathlib import Path
-# from typing import NamedTuple
-# import cProfile
-# import functools as ft
-# import itertools as it
-# import math
-# import networkx as nx
-# import operator as op
-# import pygraphviz as pgv
-# import re
-# import sympy
-
-
 ExampleInput1 = """\
 2333133121414131402
 """
 
 Free = 2 << 31
 
-def part1(s):
+
+def parse(s):
     s = s.splitlines()[0]
     size = sum(int(_) for _ in s)
     disk = [Free] * size
@@ -59,18 +27,10 @@ def part1(s):
         file +=1
         space = True
 
-    lcur = 0
-    rcur = len(disk) - 1
-    while True:
-        while disk[lcur] != Free:
-            lcur += 1
-        while disk[rcur] == Free:
-            rcur -= 1
-        if lcur >= rcur:
-            break
-        disk[lcur] = disk[rcur]
-        disk[rcur] = Free
+    return disk, file - 1
 
+
+def checksum(disk):
     return sum(i * file for i, file in enumerate(disk) if file != Free)
 
 
@@ -84,25 +44,26 @@ def print_disk(disk):
     print("".join(out))
 
 
-def part2(s):
-    s = s.splitlines()[0]
-    size = sum(int(_) for _ in s)
-    disk = [Free] * size
+def part1(s):
+    disk, maxfile = parse(s)
 
-    cur = 0
-    file = 0
-    space = False
-    for n in s:
-        n = int(n)
-        if space:
-            cur += n
-            space = False
-            continue
-        for _ in range(n):
-            disk[cur] = file
-            cur += 1
-        file +=1
-        space = True
+    lcur = 0
+    rcur = len(disk) - 1
+    while True:
+        while disk[lcur] != Free:
+            lcur += 1
+        while disk[rcur] == Free:
+            rcur -= 1
+        if lcur >= rcur:
+            break
+        disk[lcur] = disk[rcur]
+        disk[rcur] = Free
+
+    return checksum(disk)
+
+
+def part2(s):
+    disk, maxfile = parse(s)
 
     def find_file(fid):
         start = None
@@ -136,7 +97,6 @@ def part2(s):
                 freelen = 0
         return None
 
-    maxfile = file - 1
     for fid in range(maxfile, -1, -1):
         start, size = find_file(fid)
         free = find_space(size, start)
@@ -144,7 +104,7 @@ def part2(s):
             fill(start, size, Free)
             fill(free, size, fid)
 
-    return sum(i * file for i, file in enumerate(disk) if file != Free)
+    return checksum(disk)
 
 
 def real_input():
