@@ -11,6 +11,7 @@ def parse(s):
     s = s.splitlines()[0]
     size = sum(int(_) for _ in s)
     disk = [Free] * size
+    filemap = []
 
     cur = 0
     file = 0
@@ -21,13 +22,14 @@ def parse(s):
             cur += n
             space = False
             continue
+        filemap.append((cur, n))
         for _ in range(n):
             disk[cur] = file
             cur += 1
         file +=1
         space = True
 
-    return disk, file - 1
+    return disk, filemap
 
 
 def checksum(disk):
@@ -45,7 +47,7 @@ def print_disk(disk):
 
 
 def part1(s):
-    disk, maxfile = parse(s)
+    disk, filemap = parse(s)
 
     lcur = 0
     rcur = len(disk) - 1
@@ -63,16 +65,7 @@ def part1(s):
 
 
 def part2(s):
-    disk, maxfile = parse(s)
-
-    def find_file(fid):
-        start = None
-        for i, f in enumerate(disk):
-            if start == None and f == fid:
-                start = i
-            if start != None and f != fid:
-                return start, i - start
-        return start, len(disk) - start
+    disk, filemap = parse(s)
 
     def fill(loc, size, val):
         for i in range(loc, loc+size):
@@ -97,8 +90,7 @@ def part2(s):
                 freelen = 0
         return None
 
-    for fid in range(maxfile, -1, -1):
-        start, size = find_file(fid)
+    for fid, (start, size) in reversed(list(enumerate(filemap))):
         free = find_space(size, start)
         if free != None:
             fill(start, size, Free)
