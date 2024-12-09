@@ -102,6 +102,7 @@ def part2(s):
     maxfile = file - 1
 
     for fid in range(maxfile, -1, -1):
+        #print_diskmap(diskmap)
         start_index = None
         size = None
         for i in range(len(diskmap)):
@@ -121,16 +122,7 @@ def part2(s):
                 break
 
         if dest_index != None:
-            #print(f"Moving {fid} ({size}) from {start_index} to {dest_index} ({dest_size})")
-            before = diskmap[0:dest_index]
-            insert = [diskmap[start_index]]
-            if dest_size > size:
-                insert.append((Free, dest_size - size))
-            after1 = diskmap[dest_index+1:start_index]
-            nowfree = [(Free, size)]
-            after2 = diskmap[start_index+1:]
-            diskmap = before + insert + after1 + nowfree + after2
-            diskmap = coalesce(diskmap)
+            diskmap = move_file(diskmap, start_index, dest_index)
 
     cur = 0
     total = 0
@@ -141,21 +133,38 @@ def part2(s):
 
     return total
 
-def coalesce(diskmap):
-    newmap = []
-    runlen = 0
-    for file, size in diskmap:
-        if file == Free:
-            runlen += size
+def move_file(diskmap, start, dest):
+    file, size = diskmap[start]
+
+    newmap = diskmap[:dest]
+    freelen = 0
+    for i, e in enumerate(diskmap):
+        if i < dest:
             continue
 
-        if runlen > 0:
-            newmap.append((Free, runlen))
-            runlen = 0
+        if i == start:
+            freelen += size
+            continue
 
-        newmap.append((file, size))
-    if runlen > 0:
-        newmap.append((Free, runlen))
+        if i == dest:
+            assert(freelen == 0)
+            newmap.append((file, size))
+            freelen = diskmap[dest][1] - size
+            continue
+
+        f, s = e
+        if f == Free:
+            freelen += s
+            continue
+
+        if freelen > 0:
+            newmap.append((Free, freelen))
+            freelen = 0
+        newmap.append(e)
+
+    if freelen > 0:
+        newmap.append((Free, freelen))
+
     return newmap
 
 
@@ -174,19 +183,19 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (1928)")
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (6154342787400)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (2858)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (6183632723350)")
     print(part2(real_input()))
 
 
