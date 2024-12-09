@@ -86,96 +86,66 @@ def print_disk(disk):
 
 def part2(s):
     s = s.splitlines()[0]
-    diskmap = []
+    size = sum(int(_) for _ in s)
+    disk = [Free] * size
 
+    cur = 0
     file = 0
     space = False
     for n in s:
         n = int(n)
         if space:
-            diskmap.append((Free, n))
-        else:
-            diskmap.append((file, n))
-            file += 1
-        space = not space
+            cur += n
+            space = False
+            continue
+        for _ in range(n):
+            disk[cur] = file
+            cur += 1
+        file +=1
+        space = True
+
+    def find_file(fid):
+        start = None
+        for i, f in enumerate(disk):
+            if start == None and f == fid:
+                start = i
+            if start != None and f != fid:
+                return start, i - start
+        return start, len(disk) - start
+
+    def fill(loc, size, val):
+        for i in range(loc, loc+size):
+            disk[i] = val
+
+    def find_space(size, before):
+        start = None
+        freelen = 0
+        for i, f in enumerate(disk):
+            if i == before:
+                return None
+
+            if f == Free:
+                if start == None:
+                    start = i
+                    assert(freelen == 0)
+                freelen += 1
+                if freelen == size:
+                    return start
+            else:
+                start = None
+                freelen = 0
+        return None
 
     maxfile = file - 1
-
     for fid in range(maxfile, -1, -1):
-        #print_diskmap(diskmap)
-        start_index = None
-        size = None
-        for i in range(len(diskmap)):
-            if diskmap[i][0] == fid:
-                start_index = i
-                size = diskmap[i][1]
-                break
+        start, size = find_file(fid)
+        free = find_space(size, start)
+        if free != None:
+            fill(start, size, Free)
+            fill(free, size, fid)
 
-        dest_index = None
-        dest_size = None
-        for i in range(start_index):
-            if diskmap[i][0] != Free:
-                continue
-            if diskmap[i][1] >= size:
-                dest_index = i
-                dest_size = diskmap[i][1]
-                break
+    return sum(i * file for i, file in enumerate(disk) if file != Free)
 
-        if dest_index != None:
-            diskmap = move_file(diskmap, start_index, dest_index)
-
-    cur = 0
-    total = 0
-    for file, size in diskmap:
-        if file != Free:
-            total += sum(file*n for n in range(cur, cur+size))
-        cur += size
-
-    return total
-
-def move_file(diskmap, start, dest):
-    file, size = diskmap[start]
-
-    newmap = diskmap[:dest]
-    freelen = 0
-    for i, e in enumerate(diskmap):
-        if i < dest:
-            continue
-
-        if i == start:
-            freelen += size
-            continue
-
-        if i == dest:
-            assert(freelen == 0)
-            newmap.append((file, size))
-            freelen = diskmap[dest][1] - size
-            continue
-
-        f, s = e
-        if f == Free:
-            freelen += s
-            continue
-
-        if freelen > 0:
-            newmap.append((Free, freelen))
-            freelen = 0
-        newmap.append(e)
-
-    if freelen > 0:
-        newmap.append((Free, freelen))
-
-    return newmap
-
-
-def print_diskmap(diskmap):
-    s = []
-    for (n, size) in diskmap:
-        c = str(n)
-        if n == Free:
-            c = '.'
-        s.append(c * size)
-    print("".join(s))
 
 def real_input():
     with open("input.txt", "r") as infile:
