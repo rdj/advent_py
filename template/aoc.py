@@ -2,7 +2,7 @@
 
 ## Things I used in previous years
 
-# from colors import color
+# from colors import color  ## pip install py-colors
 # from collections import Counter
 # from collections import defaultdict
 # from collections import deque
