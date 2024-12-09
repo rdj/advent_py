@@ -83,9 +83,90 @@ def print_disk(disk):
             out.append(str(_))
     print("".join(out))
 
-def part2(s):
-    return "TODO"
 
+def part2(s):
+    s = s.splitlines()[0]
+    diskmap = []
+
+    file = 0
+    space = False
+    for n in s:
+        n = int(n)
+        if space:
+            diskmap.append((Free, n))
+        else:
+            diskmap.append((file, n))
+            file += 1
+        space = not space
+
+    maxfile = file - 1
+
+    for fid in range(maxfile, -1, -1):
+        start_index = None
+        size = None
+        for i in range(len(diskmap)):
+            if diskmap[i][0] == fid:
+                start_index = i
+                size = diskmap[i][1]
+                break
+
+        dest_index = None
+        dest_size = None
+        for i in range(start_index):
+            if diskmap[i][0] != Free:
+                continue
+            if diskmap[i][1] >= size:
+                dest_index = i
+                dest_size = diskmap[i][1]
+                break
+
+        if dest_index != None:
+            #print(f"Moving {fid} ({size}) from {start_index} to {dest_index} ({dest_size})")
+            before = diskmap[0:dest_index]
+            insert = [diskmap[start_index]]
+            if dest_size > size:
+                insert.append((Free, dest_size - size))
+            after1 = diskmap[dest_index+1:start_index]
+            nowfree = [(Free, size)]
+            after2 = diskmap[start_index+1:]
+            diskmap = before + insert + after1 + nowfree + after2
+            diskmap = coalesce(diskmap)
+
+    cur = 0
+    total = 0
+    for file, size in diskmap:
+        if file != Free:
+            total += sum(file*n for n in range(cur, cur+size))
+        cur += size
+
+    return total
+
+def coalesce(diskmap):
+    newmap = []
+    runlen = 0
+    for file, size in diskmap:
+        if file == Free:
+            runlen += size
+            continue
+
+        if runlen > 0:
+            newmap.append((Free, runlen))
+            runlen = 0
+
+        newmap.append((file, size))
+    if runlen > 0:
+        newmap.append((Free, runlen))
+    return newmap
+
+
+def print_diskmap(diskmap):
+    s = []
+    for (n, size) in diskmap:
+        c = str(n)
+        if n == Free:
+            c = '.'
+        s.append(c * size)
+    print("".join(s))
 
 def real_input():
     with open("input.txt", "r") as infile:
