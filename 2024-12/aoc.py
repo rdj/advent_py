@@ -1,36 +1,8 @@
 #!/usr/bin/env pypy3
 
-## Things I used in previous years
-
-# from colors import color  ## pip install py-colors
-# from collections import Counter
-# from collections import defaultdict
-# from collections import deque
-# from colors import color
-# from enum import Enum
-# from fractions import Fraction
-# from functools import cached_property
-# from functools import lru_cache
-# from functools import reduce
-# from functools import reduce, partial
-# from heapq import heappush, heappop
-# from itertools import pairwise
-# from math import prod
-# from more_itertools import chunked, sliding_window
-# from multiprocessing import Pool
-# from numpy import transpose
-# from operator import mul
-# from pathlib import Path
+from collections import defaultdict
+from more_itertools import sliding_window
 from typing import NamedTuple
-# import cProfile
-# import functools as ft
-# import itertools as it
-# import math
-# import networkx as nx
-# import operator as op
-# import pygraphviz as pgv
-# import re
-# import sympy
 
 
 ExampleInput1 = """\
@@ -102,7 +74,6 @@ W = Point(-1, 0)
 
 DIRS = [N, E, S, W]
 
-
 class Grid:
     def __init__(self, s):
         self.grid = s.splitlines()
@@ -110,13 +81,13 @@ class Grid:
         self.width = len(self.grid[0])
 
     def points(self):
-        return (Point(x, y) for x in range(self.width) for y in range(self.height))
+        return [Point(x, y) for x in range(self.width) for y in range(self.height)]
 
     def in_range(self, p):
         return 0 <= p.x < self.width and 0 <= p.y < self.height
 
     def neighbors(self, p):
-        return (n for n in p.neighbors() if self.in_range(n))
+        return [n for n in p.neighbors() if self.in_range(n)]
 
     def __getitem__(self, p):
         return self.grid[p.y][p.x]
@@ -148,8 +119,32 @@ class Grid:
         return sum((len([n for n in p.neighbors() if n not in r]) for p in r))
 
     def sides(self, r):
-        return 1
+        fences = {}
+        for d in DIRS:
+            fences[d] = defaultdict(list)
 
+        for p in r:
+            for n in p.neighbors():
+                if n in r:
+                    continue
+
+                d = p - n
+                if d.x == 0:
+                    fences[d][n.y].append(n.x)
+                else:
+                    fences[d][n.x].append(n.y)
+
+        return sum(count_ranges(fence) for fence in fences.values())
+
+def count_ranges(fence):
+    t = 0
+    for _, nums in fence.items():
+        nums = sorted(nums)
+        t += 1
+        for a, b in sliding_window(nums, 2):
+            if b - a > 1:
+                t += 1
+    return t
 
 def part1(s):
     g = Grid(s)
@@ -205,7 +200,7 @@ def run_all():
     print(part2(ExampleInput3))
 
     print()
-    print("Part 2")
+    print("Part 2 (891106)")
     print(part2(real_input()))
 
 
