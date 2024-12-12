@@ -3,6 +3,7 @@
 from collections import defaultdict
 from more_itertools import sliding_window
 from typing import NamedTuple
+from functools import cache
 
 
 ExampleInput1 = """\
@@ -144,15 +145,18 @@ def count_ranges(fence):
                 t += 1
     return t
 
-def part1(s):
+@cache
+def parse(s):
     g = Grid(s)
-    regions = g.discover_regions()
+    return g, g.discover_regions()
+
+def part1(s):
+    g, regions = parse(s)
     return sum([len(r) * g.perimeter(r) for r in regions])
 
 
 def part2(s):
-    g = Grid(s)
-    regions = g.discover_regions()
+    g, regions = parse(s)
     return sum([len(r) * g.sides(r) for r in regions])
 
 
