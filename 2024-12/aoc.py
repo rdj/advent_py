@@ -116,12 +116,10 @@ class Grid:
         return regions
 
     def perimeter(self, r):
-        return sum((len([n for n in p.neighbors() if n not in r]) for p in r))
+        return sum([len([n for n in p.neighbors() if n not in r]) for p in r])
 
     def sides(self, r):
-        fences = {}
-        for d in DIRS:
-            fences[d] = defaultdict(list)
+        fences = {d: defaultdict(list) for d in DIRS}
 
         for p in r:
             for n in p.neighbors():
@@ -149,13 +147,13 @@ def count_ranges(fence):
 def part1(s):
     g = Grid(s)
     regions = g.discover_regions()
-    return sum(len(r) * g.perimeter(r) for r in regions)
+    return sum([len(r) * g.perimeter(r) for r in regions])
 
 
 def part2(s):
     g = Grid(s)
     regions = g.discover_regions()
-    return sum(len(r) * g.sides(r) for r in regions)
+    return sum([len(r) * g.sides(r) for r in regions])
 
 
 def real_input():
