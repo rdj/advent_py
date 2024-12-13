@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 from more_itertools import chunked
 import re
@@ -23,6 +23,7 @@ Button B: X+27, Y+71
 Prize: X=18641, Y=10279
 """
 
+
 def parse(s):
     games = []
     for lines in chunked(s.splitlines(), 4):
@@ -34,44 +35,36 @@ def parse(s):
     return games
 
 
-def part1(s):
+def total_tokens(games, embiggen=False):
     tokens = 0
-    games = parse(s)
 
+    c = 0
+    if embiggen:
+        c = 10000000000000
+
+    a = z3.Int('a')
+    b = z3.Int('b')
     for g in games:
-        a = z3.Int('a')
-        b = z3.Int('b')
         opt = z3.Optimize()
-        opt.add(a <= 100, b <= 100, a >= 0, b >= 0)
-        opt.add(a * g[0][0] + b * g[1][0] == g[2][0])
-        opt.add(a * g[0][1] + b * g[1][1] == g[2][1])
+        opt.add(a >= 0, b >= 0)
+        if not embiggen:
+            opt.add(a <= 100, b <= 100)
+        opt.add(a * g[0][0] + b * g[1][0] == (c + g[2][0]))
+        opt.add(a * g[0][1] + b * g[1][1] == (c + g[2][1]))
         opt.minimize(3*a + b)
         if opt.check() == z3.sat:
             m = opt.model()
             tokens += 3*m[a] + m[b]
 
     return z3.simplify(tokens)
+
+
+def part1(s):
+    return total_tokens(parse(s))
 
 
 def part2(s):
-    tokens = 0
-    games = parse(s)
-
-    BIG = 10000000000000
-
-    for g in games:
-        a = z3.Int('a')
-        b = z3.Int('b')
-        opt = z3.Optimize()
-        opt.add(a >= 0, b >= 0)
-        opt.add(a * g[0][0] + b * g[1][0] == (BIG + g[2][0]))
-        opt.add(a * g[0][1] + b * g[1][1] == (BIG + g[2][1]))
-        opt.minimize(3*a + b)
-        if opt.check() == z3.sat:
-            m = opt.model()
-            tokens += 3*m[a] + m[b]
-
-    return z3.simplify(tokens)
+    return total_tokens(parse(s), embiggen=True)
 
 
 def real_input():
