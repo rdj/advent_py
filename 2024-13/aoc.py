@@ -45,13 +45,11 @@ def total_tokens(games, embiggen=False):
     a = z3.Int('a')
     b = z3.Int('b')
     for g in games:
-        opt = z3.Optimize()
-        opt.add(a >= 0, b >= 0)
-        if not embiggen:
-            opt.add(a <= 100, b <= 100)
+        # Originally used z3.Optimize but it turns out always either one or
+        # zero solutions to this system. Runtime is much faster with Solver.
+        opt = z3.Solver()
         opt.add(a * g[0][0] + b * g[1][0] == (c + g[2][0]))
         opt.add(a * g[0][1] + b * g[1][1] == (c + g[2][1]))
-        opt.minimize(3*a + b)
         if opt.check() == z3.sat:
             m = opt.model()
             tokens += 3*m[a] + m[b]
