@@ -1,8 +1,6 @@
 #!/usr/bin/env pypy3
 
-from collections import defaultdict
 from math import prod
-from more_itertools import sliding_window
 
 
 ExampleInput1 = """\
@@ -30,11 +28,9 @@ def parse(s):
     return ic
 
 
-def part1(s, w=101, h=103):
-    tmax = 100
-    ic = parse(s)
+def quadcounts(ic, w=101, h=103, tmax=100, printquads=False):
     quads = [0] * 4
-    for (x0, y0), (vx, vy) in sorted(ic):
+    for (x0, y0), (vx, vy) in ic:
         f = ((x0 + vx * tmax) % w, (y0 + vy * tmax) % h)
         q = 0
         if f[0] == w//2 or f[1] == h//2 :
@@ -45,48 +41,24 @@ def part1(s, w=101, h=103):
             q |= 2
         quads[q] += 1
 
-    return prod(quads)
+    if printquads:
+        print(quads)
+    return quads
 
 
-def print_tree(fd, tmax, w, h):
-    s = []
-    for y in range(h):
-        for x in range(w):
-            match fd[(x, y)]:
-                case 0:
-                    s.append('.')
-                case n:
-                    s.append(str(n))
-        s.append("\n")
-    print("".join(s))
-    print(f"{tmax=}")
+def part1(s, w=101, h=103):
+    return prod(quadcounts(parse(s), w, h))
 
 
-LONG_RUN = 10
-
-# I actually just dumped the first 10,000 print_tree outputs to a file and
-# grepped for a long row of non-dots in a row, but then I came back and
-# implemented that strategy in code
 def part2(s, w=101, h=103):
     ic = parse(s)
-
-    tmax = 1
-    while True:
-        fd = defaultdict(int)
-        for (x0, y0), (vx, vy) in ic:
-            f = ((x0 + vx * tmax) % w, (y0 + vy * tmax) % h)
-            fd[f] += 1
-
-        run = 0
-        for (x0, y0), (x1, y1) in sliding_window(sorted(fd.keys()), 2):
-            if x0 == x1 and y1 - y0 <= 1:
-                run += 1
-                if run >= LONG_RUN:
-                    #print_tree(fd, tmax, w, h)
-                    return tmax
-            else:
-                run = 0
-        tmax += 1
+    nrobots = len(ic)
+    majority = nrobots // 2
+    for tmax in range(10_000):
+        quads = quadcounts(ic, w, h, tmax)
+        if any(q > majority for q in quads):
+            return tmax
+    raise Exception("No solution")
 
 
 def real_input():
