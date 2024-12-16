@@ -108,8 +108,6 @@ class Grid:
         q = []
         heappush(q, (0, self.start, E))
 
-        best_paths = []
-
         while q:
             cost, pos, facing = heappop(q)
             key = (pos, facing)
@@ -152,9 +150,12 @@ class Grid:
 
     def build_covered(self, best_cost_to_end, best_known):
         covered_states = set()
-        for (pos, facing), (cost, prev) in best_known.items():
-            if pos == self.end and cost == best_cost_to_end:
-                r_build_covered(covered_states, best_known, (pos, facing))
+        end_states = [(self.end, d) for d in DIRS]
+        for state in end_states:
+            cost, prev = best_known[state]
+            if cost > best_cost_to_end:
+                continue
+            r_build_covered(covered_states, best_known, state)
 
         covered_points = set([pos for pos, _ in covered_states])
         return covered_points
@@ -162,11 +163,10 @@ class Grid:
 def r_build_covered(covered, best_known, src):
     covered.add(src)
 
-    for state, (cost, prev) in best_known.items():
-        if state == src:
-            for state in prev:
-                if state not in covered:
-                    r_build_covered(covered, best_known, state)
+    _, prev = best_known[src]
+    for state in prev:
+        if state not in covered:
+            r_build_covered(covered, best_known, state)
     return covered
 
 def part1(s):
