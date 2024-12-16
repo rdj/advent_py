@@ -100,6 +100,7 @@ class Grid:
     def __getitem__(self, p):
         return self.grid[p.y][p.x]
 
+    # Dijkstra, keeping track of multiple precedent states (all paths)
     def find_best(self):
         best_cost_to_end = 2 << 31
         best_known = defaultdict(lambda: (2 << 31, set()))
