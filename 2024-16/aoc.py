@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
+from collections import defaultdict
 from heapq import heappush, heappop
 from typing import NamedTuple
 
@@ -99,78 +100,84 @@ class Grid:
     def __getitem__(self, p):
         return self.grid[p.y][p.x]
 
-    def find_best_paths(self):
-        return self.find_best(True)
-
-    def find_best_path(self):
-        return self.find_best(False)[0][0]
-
-
-    def find_best(self, allpaths):
-        best_known = {}
-        best_known[(self.start, E)] = 0
-
+    def find_best(self):
+        best_cost_to_end = 2 << 31
+        best_known = defaultdict(lambda: (2 << 31, set()))
         visited = set()
 
         q = []
-        heappush(q, (0, self.start, E, (self.start,)))
+        heappush(q, (0, self.start, E))
 
         best_paths = []
 
         while q:
-            cost, pos, facing, path = heappop(q)
+            cost, pos, facing = heappop(q)
             key = (pos, facing)
 
-            if len(best_paths) > 0:
-                if cost > best_paths[0][0]:
-                    break
+            if cost > best_cost_to_end:
+                break
 
-            if not allpaths:
-                if key in visited:
-                    continue
-                visited.add(key)
+            if key in visited:
+                continue
+            visited.add(key)
 
             if pos == self.end:
-                best_paths.append((cost, path))
-                best_paths.sort()
+                best_cost_to_end = min(cost, best_cost_to_end)
                 continue
 
             left, right = rot90(facing)
             branches = (
-                (cost + 1, pos + facing, facing, path + (pos + facing,)),
-                (cost + 1000, pos, left, path),
-                (cost + 1000, pos, right, path),
+                (cost + 1, pos + facing, facing),
+                (cost + 1000, pos, left),
+                (cost + 1000, pos, right),
             )
             for b in branches:
-                newcost, newpos, newfacing, newpath = b
-                newkey = (newpos, newfacing)
+                newcost, newpos, newfacing = b
                 if self[newpos] == '#':
                     continue
-                if not allpaths:
-                    if newkey in visited:
-                        continue
-                should_pursue = newkey not in best_known or newcost < best_known[newkey]
-                if allpaths:
-                    should_pursue = newkey not in best_known or newcost <= best_known[newkey]
-                if should_pursue:
-                    best_known[newkey] = newcost
+
+                newkey = (newpos, newfacing)
+                bestcost, bestprev = best_known[newkey]
+                if newcost > bestcost:
+                    continue
+
+                if newcost < bestcost:
+                    best_known[newkey] = (newcost, set([(pos,facing)]))
+                else:
+                    bestprev.add((pos, facing))
+                if newkey not in visited:
                     heappush(q, b)
 
-        best_cost = min(cost for cost, *_ in best_paths)
-        return [_ for _ in best_paths if _[0] == best_cost]
+        return (best_cost_to_end, self.build_covered(best_cost_to_end, best_known))
 
+    def build_covered(self, best_cost_to_end, best_known):
+        covered_states = set()
+        for (pos, facing), (cost, prev) in best_known.items():
+            if pos == self.end and cost == best_cost_to_end:
+                r_build_covered(covered_states, best_known, (pos, facing))
+
+        covered_points = set([pos for pos, _ in covered_states])
+        return covered_points
+
+def r_build_covered(covered, best_known, src):
+    covered.add(src)
+
+    for state, (cost, prev) in best_known.items():
+        if state == src:
+            for state in prev:
+                if state not in covered:
+                    r_build_covered(covered, best_known, state)
+    return covered
 
 def part1(s):
     g = Grid(s)
-    return g.find_best_path()
+    cost, covered = g.find_best()
+    return cost
 
 
 def part2(s):
     g = Grid(s)
-    best = g.find_best_paths()
-    covered = set()
-    for _, path in best:
-        covered.update(path)
+    cost, covered = g.find_best()
     return len(covered)
 
 
