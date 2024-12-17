@@ -133,29 +133,11 @@ def part1(s):
 #  octal input, and DFS when the nth leftmost digit gives the correct nth
 #  rightmost digit.
 def part2(s):
-
-    c = parse(real_input())
-
-    # Input range: 2**45 - 2**48 - 1
-
-    ## Exporatory code:
-    # nprog = len(c.prog)
-    # nbprog = nprog * 3
-    # sprog = "".join(map(str, c.prog))
-    # iprog = int(sprog, 8)
-    # print(f"Program is {nprog} octal digits ({nbprog} bits)")
-    # #print(f"{sprog} (Oct) -> {iprog} (Dec) -> {iprog:08X} (Hex) -> {iprog:048b} (Bin)")
-    # print(f"{iprog:048b} ({iprog:016o})")
-
-    # for i in range(0,8):
-    #     a = 0b101_110 << 42 | i << 39
-    #     ao = c.calc(a)
-    #     sao = "".join(map(str, ao))
-    #     iao = int(sao, 8)
-    #     print(f"{a:048b} ({a:016o}) -> {iao:048b} ({iao:016o})")
+    c = parse(s)
+    proglen = len(c.prog)
 
     def seq2int(seq):
-        seq = seq + [0] * (16 - len(seq))
+        seq = seq + [0] * (proglen - len(seq))
         return int("".join(map(str, seq)), 8)
     def correctness(out):
         for i in range(len(out)):
@@ -196,6 +178,10 @@ def run_all():
     print()
     print("Part 1 (6,1,6,4,2,4,7,3,5)")
     print(part1(real_input()))
+
+    print()
+    print("Example Part 2 (117440)")
+    print(part2(ExampleInput2))
 
     print()
     print("Part 2 (202975183645226)")
