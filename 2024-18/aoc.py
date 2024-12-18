@@ -39,12 +39,15 @@ ExampleStepCount = 12
 RealGridSize = 71
 RealStepCount = 1024
 
+NoPath = 2 << 31
+
 class Point(NamedTuple):
     x: int
     y: int
 
     def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
+        x, y = other
+        return Point(self.x + x, self.y + y)
 
     def __repr__(self):
         return f"({self.x}, {self.y})"
@@ -59,27 +62,33 @@ S = Point(0, 1)
 W = Point(-1, 0)
 
 DIRS = [N, E, S, W]
-
 class Grid:
     def __init__(self, size):
-        self.grid = []
-        for _ in range(size):
-            self.grid.append(['.'] * size)
+        self.grid = ['.'] * (size*size)
+        self.template = tuple(self.grid)
         self.height = size
         self.width = size
 
         self.start = Point(0, 0)
         self.end = Point(size - 1, size - 1)
 
+    def reset(self):
+        self.grid = list(self.template)
+
     def __getitem__(self, p):
-        return self.grid[p.y][p.x]
+        x, y = p
+        return self.grid[y * self.width + x]
+
+    def __setitem__(self, p, v):
+        x, y = p
+        self.grid[y * self.width + x] = v
 
     def neighbors(self, p):
         return [n for n in p.neighbors() if 0 <= n.y < self.height and 0 <= n.x < self.width]
 
     def find_shortest_path(self):
-        best_cost_to_end = 2 << 31
-        best_known = defaultdict(lambda: 2 << 31)
+        best_cost_to_end = NoPath
+        best_known = defaultdict(lambda: NoPath)
         visited = set()
 
         q = []
@@ -128,7 +137,7 @@ def part1(s, size, steps):
     badspots = parse(s)
 
     for x, y in badspots[:steps]:
-        g.grid[y][x] = '#'
+        g[(x, y)] = '#'
 
     return g.find_shortest_path()
 
@@ -137,12 +146,23 @@ def part2(s, size):
     g = Grid(size)
     badspots = parse(s)
 
-    for x, y in badspots:
-        g.grid[y][x] = '#'
-        if g.find_shortest_path() == 2<<31:
-            return f"{x},{y}"
-
-    raise Exception("Solution not found")
+    # Note this bisect/binary search finds the boundary where the condition
+    # changes. After the loop `lower` is the last succeeding index and `upper`
+    # is the first failing index. It does not handle the case where there is no
+    # boundary; it will hallucinate the boundary at 0/1 (if all True) or
+    # len-2/len-1 (if all False).
+    lower = 0
+    upper = len(badspots) - 1
+    while upper - lower > 1:
+        n = (upper - lower) // 2 + lower
+        for x, y in badspots[:n+1]:
+            g[(x, y)] = '#'
+        if g.find_shortest_path() == NoPath:
+            upper = n
+        else:
+            lower = n
+        g.reset()
+    return badspots[upper]
 
 
 def real_input():
