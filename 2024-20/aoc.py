@@ -107,40 +107,47 @@ class Grid:
         return dict(best_known)
 
     def find_cheats1(self):
-        cheats = defaultdict(int)
+        cheats = 0
         dists = self.find_distances()
         for pos, cost in dists.items():
             for n in [pos + d + d for d in DIRS]:
                 if n not in dists:
                     continue
                 savings = cost - dists[n] - 2
-                if savings > 0:
-                    cheats[savings] += 1
+                if savings > 100:
+                    cheats += 1
         return cheats
 
-    def find_cheats(self, cheatlen=2):
-        cheats = defaultdict(int)
+
+    def find_cheats(self, cheatlen):
+        cheats = 0
         dists = self.find_distances()
-        for pos, cost in dists.items():
-            for dest, destcost in dists.items():
-                md = pos.manhattan(dest)
-                if 0 < md <= cheatlen:
-                    savings = cost - destcost - md
-                    if savings > 0:
-                        cheats[savings] += 1
-        return cheats
+        for (x0, y0), cost in dists.items():
+            for dy in range(-cheatlen, cheatlen+1):
+                maxdx = cheatlen - abs(dy)
+                for dx in range(-maxdx, maxdx+1):
+                    x1, y1 = dest = (x0 + dx, y0 + dy)
+                    if not (0 <= x1 < self.width and 0 <= y1 < self.height):
+                        continue
+                    if self.grid[y1][x1] == "#":
+                        continue
 
+                    destcost = dists[dest]
+                    md = abs(dy) + abs(dx)
+                    savings = cost - destcost - md
+                    if savings >= 100:
+                        cheats +=1
+
+        return cheats
 
 def part1(s):
     g = Grid(s)
-    cheats = g.find_cheats1()
-    return sum(n for k, n in cheats.items() if k >= 100)
+    return g.find_cheats1()
 
 
 def part2(s):
     g = Grid(s)
-    cheats = g.find_cheats(20)
-    return sum(n for k, n in cheats.items() if k >= 100)
+    return g.find_cheats(20)
 
 
 def real_input():
