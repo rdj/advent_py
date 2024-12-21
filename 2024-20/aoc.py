@@ -43,6 +43,15 @@ class Point(NamedTuple):
         return abs(x0 - x1) + abs(y0 - y1)
 
 
+def manhattan_circle(size):
+    circle = []
+    for dy in range(-size, size+1):
+        maxdx = size - abs(dy)
+        for dx in range(-maxdx, maxdx+1):
+            circle.append((dx, dy, abs(dy) + abs(dx)))
+    return tuple(circle)
+
+
 N = Point(0, -1)
 E = Point(1, 0)
 S = Point(0, 1)
@@ -121,22 +130,20 @@ class Grid:
 
     def find_cheats(self, cheatlen):
         cheats = 0
+        deltas = manhattan_circle(cheatlen)
         dists = self.find_distances()
         for (x0, y0), cost in dists.items():
-            for dy in range(-cheatlen, cheatlen+1):
-                maxdx = cheatlen - abs(dy)
-                for dx in range(-maxdx, maxdx+1):
-                    x1, y1 = dest = (x0 + dx, y0 + dy)
-                    if not (0 <= x1 < self.width and 0 <= y1 < self.height):
-                        continue
-                    if self.grid[y1][x1] == "#":
-                        continue
+            for (dx, dy, md) in deltas:
+                x1, y1 = dest = (x0 + dx, y0 + dy)
+                if not (0 <= x1 < self.width and 0 <= y1 < self.height):
+                    continue
+                if self.grid[y1][x1] == "#":
+                    continue
 
-                    destcost = dists[dest]
-                    md = abs(dy) + abs(dx)
-                    savings = cost - destcost - md
-                    if savings >= 100:
-                        cheats +=1
+                destcost = dists[dest]
+                savings = cost - destcost - md
+                if savings >= 100:
+                    cheats +=1
 
         return cheats
 
