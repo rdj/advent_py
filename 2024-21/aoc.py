@@ -36,7 +36,6 @@ class EntryPad:
                         self.gap = (x, y)
                     case c:
                         self.posmap[c] = (x, y)
-        self.pos = self.posmap['A']
         self.layer = layer
 
     @cache
@@ -83,48 +82,37 @@ class EntryPad:
 
     def get_inputs(self, code):
         inputs = 0
+        pos = self.posmap['A']
         for c in code:
             dst = self.posmap[c]
-            inputs += self.navigate(self.pos, dst)
-            self.pos = dst
+            inputs += self.navigate(pos, dst)
+            pos = dst
         return inputs
 
     @cached_property
     def next_layer(self):
         if self.layer == 0:
             return None
-        return Dirpad(self.layer - 1)
+        return EntryPad(DirectionLayout, self.layer - 1)
 
 
-class Numpad(EntryPad):
-    def __init__(self, layer):
-        super().__init__(NumpadLayout, layer)
+def compute_complexity(s, layers):
+    n = EntryPad(NumpadLayout, layers)
 
-class Dirpad(EntryPad):
-    def __init__(self, layer):
-        super().__init__(DirectionLayout, layer)
+    total = 0
+    for code in s.splitlines():
+        dirs = n.get_inputs(code)
+        total += dirs * int(code[:-1])
+
+    return total
 
 
 def part1(s):
-    n = Numpad(2)
-
-    total = 0
-    for code in s.splitlines():
-        dirs = n.get_inputs(code)
-        total += dirs * int(code[:-1])
-
-    return total
+    return compute_complexity(s, 2)
 
 
 def part2(s):
-    n = Numpad(25)
-
-    total = 0
-    for code in s.splitlines():
-        dirs = n.get_inputs(code)
-        total += dirs * int(code[:-1])
-
-    return total
+    return compute_complexity(s, 25)
 
 
 def real_input():
