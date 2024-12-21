@@ -1,7 +1,6 @@
 #!/usr/bin/env pypy3
 
-from functools import cache
-from functools import cached_property
+from functools import cache, cached_property
 from itertools import permutations
 
 
@@ -39,7 +38,7 @@ class EntryPad:
         self.layer = layer
 
     @cache
-    def navigate(self, src, dst):
+    def shortest_deepest_path(self, src, dst):
         inputs = []
         x0, y0 = src
         x1, y1 = dst
@@ -76,17 +75,17 @@ class EntryPad:
                     break
 
         if self.next_layer:
-            return min(self.next_layer.get_inputs("".join(p) + "A") for p in paths)
+            return min(self.next_layer.shortest_inputlen("".join(p) + "A") for p in paths)
         else:
             return min(map(len, paths)) + 1
 
-    def get_inputs(self, code):
+    def shortest_inputlen(self, code):
         inputs = 0
-        pos = self.posmap['A']
+        src = self.posmap['A']
         for c in code:
             dst = self.posmap[c]
-            inputs += self.navigate(pos, dst)
-            pos = dst
+            inputs += self.shortest_deepest_path(src, dst)
+            src = dst
         return inputs
 
     @cached_property
@@ -98,13 +97,7 @@ class EntryPad:
 
 def compute_complexity(s, layers):
     n = EntryPad(NumpadLayout, layers)
-
-    total = 0
-    for code in s.splitlines():
-        dirs = n.get_inputs(code)
-        total += dirs * int(code[:-1])
-
-    return total
+    return sum(n.shortest_inputlen(code) * int(code[:-1]) for code in s.splitlines())
 
 
 def part1(s):
