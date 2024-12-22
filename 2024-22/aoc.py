@@ -25,7 +25,6 @@ ExampleInput2 = """\
 
 def next_secret(n):
     a = n * 64
-
     n ^= a
     n %= PRUNE_MODULUS
 
@@ -47,37 +46,33 @@ def nth_secret(a, n):
 
 
 def first_n_secrets_mod10(a, n):
-    r = [a % 10]
-    for _ in range(n):
+    r = [0] * (n + 1)
+    r[0] = a % 10
+    for i in range(n):
         a = next_secret(a)
-        r.append(a % 10)
-    return tuple(r)
+        r[i+1] = a % 10
+    return r
 
 
 def compute_deltas(nums):
-    deltas = []
-    for a, b in sliding_window(nums, 2):
-        deltas.append(b - a)
-    return tuple(deltas)
-
-
-def index_of_subseq(seq, want):
-    for i, sub in enumerate(sliding_window(seq, len(want))):
-        if sub == want:
-            return i
-    return None
+    deltas = [0] * (len(nums) - 1)
+    for i, (a, b) in enumerate(sliding_window(nums, 2)):
+        deltas[i] = b - a
+    return deltas
 
 
 def part1(s):
     return sum(nth_secret(int(line), 2000) for line in s.splitlines())
 
 
-def all_code_results(bids, deltas):
+def all_code_results(bids, deltas, counter):
+    seen = set()
     r = {}
 
     for i, code in enumerate(sliding_window(deltas, 4)):
-        if code not in r:
-            r[code] = bids[i+4]
+        if code not in seen:
+            seen.add(code)
+            counter[code] += bids[i+4]
 
     return r
 
@@ -87,11 +82,11 @@ def part2(s):
     bids = tuple(map(lambda s: first_n_secrets_mod10(s, 2000), seeds))
     deltas = tuple(map(compute_deltas, bids))
 
-    everything = Counter()
+    counter = Counter()
     for i in range(len(bids)):
-        everything += all_code_results(bids[i], deltas[i])
+        all_code_results(bids[i], deltas[i], counter)
 
-    return max(everything.values())
+    return max(counter.values())
 
 
 def real_input():
@@ -117,4 +112,6 @@ def run_all():
 
 
 if __name__ == "__main__":
+    # import cProfile
+    # cProfile.run('part2(real_input())', sort='cumulative')
     run_all()
