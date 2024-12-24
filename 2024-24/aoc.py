@@ -133,45 +133,96 @@ def part2(s):
             broken_bits.append(i)
 
     print("Broken bits:", broken_bits)
+    # Bits found wrong by experiment: 5 15 20 36
 
-    # Example:
+    # With the code above, I determined four bits that have problems. Since I
+    # found that each z only depends on same/earlier x/y, I'm hoping this means
+    # that each of the four bits has a localized problem with its adder that
+    # can be fixed by swapping two outputs.
+    #
+    # I did not come up with a reasonable programmatic way to review the adder
+    # design. (LATER NOTE: It seems like most people used graphviz or similar
+    # to visually examine the circuit layout for problems.) I did an image
+    # search for a full adder and then came up with an example for what that
+    # would look like in the format of this puzzle:
+    #
+    # Example full adder for bit 2:
+    #
     #   x02 XOR y02        -> xor02
     # xor02 XOR carry01    -> z02
     #   x02 AND y02        -> and02
     # xor02 AND carry01    -> precarry02
     # and02  OR precarry02 -> carry02
+    #
+    # Bits 0 and 45 will differ because of no carry in and out respectively.
+    # The intermediate values I've called xor02, and02, carry01, precarry02,
+    # and carry02 all have random 3-char names in the puzzle input.
+    #
+    # So now I manually isolate the five adder rules for each of the broken
+    # bits and look for a swap that fixes them.
 
-    # Bits found wrong by experiment: 5 15 20 36
+    swaps = []
 
-    ### MUST SWAP Z05/DKR
-    # x05 XOR y05 -> hdc (xor05)
-    #!!!! MISTAKE !!!!! y05 AND x05 -> z05 /// gcs XOR hdc -> z05
-    #!!!! MISTAKE !!!!! gcs XOR hdc -> dkr /// y05 AND x05 -> dkr (and05)
-    # hdc AND gcs -> fdd (precarry05)   --- gcs is carry04
-    # dkr OR fdd -> bvc (carry05)
-    #  ^ should be and05
+    # BIT 5.
+    #
+    # The z05 rule is AND rule instead of XOR rule, so we have to figure out
+    # whether it is and05 or precarry05. And swap accordingly. Here are the
+    # rules:
+    #
+    #     x05 XOR y05 -> hdc (xor05)
+    #     y05 AND x05 -> z05 <--
+    #     gcs XOR hdc -> dkr <--
+    #     hdc AND gcs -> fdd (precarry05)
+    #     dkr OR  fdd -> bvc (carry05)
+    #
+    # Fixed by swapping z05 and dkr.
+    swaps += ['z05', 'dkr']
 
-    ### MUST SWAP Z15/HTP
-    # y15 XOR x15 -> bhw (xor15)                        v (carry14 = sth)
-    # !!!! MISTAKE !!!! sth AND bhw -> z15 /// bhw XOR ??? -> z15
-    # y15 AND x15 -> hhb (and15)
-    # bhw AND sth ->
-    # bhw XOR sth -> htp (should be z15)
+    # BIT 15.
+    #
+    # Again the z15 rule is AND instead of XOR. Same logic as bit 5.
+    #
+    #     y15 XOR x15 -> bhw (xor15)
+    #     sth AND bhw -> z15 <--
+    #     y15 AND x15 -> hhb (and15)
+    #     bhw XOR sth -> htp <--
+    #     hhb OR  htp -> mqr (carry15)
+    #
+    # Fixed by swapping z15 and htp.
+    swaps += ['z15', 'htp']
 
-    ### MUST SWAP Z20/HHH
-    # x20 XOR y20 -> mvv (xor20)
-    # !!! MISTAKE !!!! mvv XOR fvm -> hhh (should be z20)
-    # x20 AND y20 -> mqg (and20)
-    # !!! MISTAKE !!! qfj OR mqg -> z20 (hhh?)
+    # BIT 20.
+    #
+    # The z20 rule is an OR rule, so it must be swapped with the carry20 rule.
+    #
+    #     x20 XOR y20 -> mvv (xor20)
+    #     qfj OR  mqg -> z20 <--
+    #     x20 AND y20 -> mqg (and20)
+    #     mvv AND fvm -> qfj (precarry20)
+    #     mvv XOR fvm -> hhh <--
+    #
+    # Fixed by swapping z20, hhh.
+    swaps += ['z20', 'hhh']
 
-    ### MUST SWAP RHV/GGK
-    # !!! MISTAKE !!! y36 XOR x36 -> rhv (should be ggk or hpg)
-    # !!! MISTAKE !!! ggk XOR hpg -> z36
-    # !!! MISTAKE !!! x36 AND y36 -> ggk
-    # ggk AND hpg -> bqf
-    # bqf OR rhv -> gqf
+    # BIT 36.
+    #
+    # This one was trickier since the z rule itself looked fine. So next look
+    # at the x/y rules, xor36 and and36. You can see they're wired wrong. For
+    # example, carry36 needs to consume xor36 instead of and36.
+    #
+    #     y36 XOR x36 -> rhv <--
+    #     ggk XOR hpg -> z36
+    #      ^------------------------- This is and36 but should be xor36.
+    #     x36 AND y36 -> ggk <--
+    #     ggk AND hpg -> bqf (precarry36)
+    #      ^------------------------- This is and36 but should be xor36.
+    #     bqf OR  rhv -> gqf (carry36)
+    #              ^----------------- This is the xor36 but should be and36.
+    #
+    # Fixed by swapping rhv, ggk.
+    swaps += ['rhv', 'ggk']
 
-    return ",".join(sorted(['z05', 'dkr', 'z15', 'htp', 'z20', 'hhh', 'rhv', 'ggk']))
+    return ",".join(sorted(swaps))
 
 
 def real_input():
