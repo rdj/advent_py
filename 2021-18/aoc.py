@@ -19,6 +19,21 @@ ExampleInput1 = """\
 """
 
 
+ExampleInput2 = """\
+[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
+[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
+[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
+[7,[5,[[3,8],[1,4]]]]
+[[2,[2,2]],[8,[8,1]]]
+[2,9]
+[1,[[[9,3],9],[[9,0],[0,7]]]]
+[[[5,[7,4]],7],1]
+[[[[4,2],2],6],[8,7]]
+"""
+
+
+
 def mag(norp):
     if isinstance(norp, int):
         return norp
@@ -49,31 +64,27 @@ def carryright(p, out):
         carryright(p[i], out)
 
 
-def carryleft(p, out):
-    for i in range(len(p)-1, -1, -1):
-        if out['carryleft'] == 0:
-            return
+def explode(p, d=0, leftone=None):
+    if leftone == None:
+        leftone = {}
 
-        if isinstance(p[i], int):
-            p[i] += out['carryleft']
-            out['carryleft'] = 0
-            return
-        carryleft(p[i], out)
-
-
-def explode(p, d=0):
     for i in range(len(p)):
-        if not isinstance(p[i], int):
+        if isinstance(p[i], int):
+            leftone['p'] = p
+            leftone['i'] = i
+        else:
             out = None
 
             if d == 3:
                 e = p[i]
                 assert(isinstance(e[0], int))
                 assert(isinstance(e[1], int))
-                out = {'carryleft': e[0], 'carryright': e[1]}
+                out = {'carryright': e[1]}
+                if leftone:
+                    leftone['p'][leftone['i']] += e[0]
                 p[i] = 0
             else:
-                out = explode(p[i], d+1)
+                out = explode(p[i], d+1, leftone)
 
             if out:
                 if i == 0:
@@ -82,12 +93,6 @@ def explode(p, d=0):
                         out['carryright'] = 0
                     else:
                         carryright(p[1], out)
-                else:
-                    if isinstance(p[0], int):
-                        p[0] += out['carryleft']
-                        out['carryleft'] = 0
-                    else:
-                        carryleft(p[0], out)
                 return out
 
 
@@ -125,6 +130,10 @@ def real_input():
 def run_all():
     print("Example Part 1 (4140)")
     print(part1(ExampleInput1))
+
+    print()
+    print("Example 2 Part 1 (3488)")
+    print(part1(ExampleInput2))
 
     print()
     print("Part 1 (4202)")
