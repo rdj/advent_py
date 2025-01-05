@@ -178,6 +178,9 @@ class Point(NamedTuple):
         d = self - other
         return d.x*d.x + d.y*d.y + d.z*d.z
 
+    def manhattan(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
+
 
 class Rotations:
     @cache
@@ -265,12 +268,14 @@ class Scanner:
                 continue
             offset = offsets.pop()
             self.mapped = tuple(r(p) + offset for p in self.readings)
+            self.location = offset
             return True
 
         return False
 
     def use_as_reference(self):
         self.mapped = self.readings
+        self.location = Point(0, 0, 0)
 
 
 def parse(s):
@@ -285,7 +290,7 @@ def parse(s):
     return tuple(scanners)
 
 
-def part1(s):
+def common(s):
     scanners = [Scanner(readings) for readings in parse(s)]
     scanners[0].use_as_reference()
 
@@ -299,13 +304,18 @@ def part1(s):
             continue
 
         s.trymap(r)
+    return scanners
 
+
+def part1(s):
+    scanners = common(s)
     allpoints = {p for s in scanners for p in s.mapped}
     return len(allpoints)
 
 
 def part2(s):
-    return "TODO"
+    scanners = common(s)
+    return max(a.location.manhattan(b.location) for a, b in product(scanners, scanners))
 
 
 def real_input():
@@ -314,19 +324,19 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
+    print("Example Part 1 (79)")
     print(part1(ExampleInput1))
 
     print()
-    print("Part 1")
+    print("Part 1 (392)")
     print(part1(real_input()))
 
     print()
-    print("Example Part 2")
+    print("Example Part 2 (3621)")
     print(part2(ExampleInput1))
 
     print()
-    print("Part 2")
+    print("Part 2 (13332)")
     print(part2(real_input()))
 
 
