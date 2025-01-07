@@ -57,17 +57,18 @@ class ImageEnhancer:
             ymin = min(ymin, p.y)
             ymax = max(ymax, p.y)
 
-        self.min = Point(xmin, ymin)
-        self.max = Point(xmax, ymax)
+        self.min = Point(xmin - 1, ymin - 1)
+        self.max = Point(xmax + 1, ymax + 1)
 
-        assert((0,0) == self.min)
+        self.expansions = 0
 
 
     def expand(self):
         offmap = self.infinite_expanse()
+        self.expansions += 1
 
-        self.min += (-2, -2)
-        self.max += (2, 2)
+        self.min += (-1, -1)
+        self.max += (1, 1)
 
         if offmap == "1":
             newimg = set(self.img)
@@ -82,7 +83,7 @@ class ImageEnhancer:
 
     def infinite_expanse(self):
         # Infinite expanse always starts dark
-        if self.min.x == 0:
+        if self.expansions == 0:
             return "0"
         # And if dark blocks stay dark, as in the example, no problem
         if not self.alg[0]:
@@ -92,7 +93,7 @@ class ImageEnhancer:
         if self.alg[-1]:
             return "1"
         # But in the real input the infinite expanse toggles
-        return str(self.min.x//2 % 2)
+        return str(self.expansions % 2)
 
 
     def enhance(self):
