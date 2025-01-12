@@ -24,6 +24,10 @@ YROOMS = 2
 YHALLWAY = 1
 WHALLWAY = 11
 
+EMPTYING = -1
+DONE = 0
+FILLING = 1
+
 
 def manhattan(p0, p1):
     x0, y0 = p0
@@ -83,11 +87,11 @@ def scan(inpods):
                 hasbad = True
 
         if hasbad:
-            rooms.append(('emptying', ytop))
+            rooms.append((EMPTYING, ytop))
         elif ytop == YROOMS:
-            rooms.append(('done', 0))
+            rooms.append((DONE, 0))
         else:
-            rooms.append(('filling', y))
+            rooms.append((FILLING, y))
 
     return hallway, rooms
 
@@ -110,7 +114,7 @@ def next_states(s):
             ri = i//pertype
             rs, yf = rooms[ri]
 
-            if rs != 'filling':
+            if rs != FILLING:
                 #print(f"Pod {i} must stay in hallway; room not ready")
                 continue
             dst = (ri * WROOM + X0ROOMS, yf)
@@ -130,7 +134,7 @@ def next_states(s):
             ri = (x - X0ROOMS)//WROOM
             rs, yf = rooms[ri]
 
-            if rs != 'emptying' or yf != y:
+            if rs != EMPTYING or yf != y:
                 #print(f"Pod {i} must stay in room {ri}, {rs} {yf}")
                 continue
 
@@ -153,6 +157,7 @@ def next_states(s):
 
 def part1(s):
     visited = set()
+    best_cost = defaultdict(lambda: 1<<16)
 
     q = []
     heappush(q, (0, parse(s)))
@@ -168,7 +173,8 @@ def part1(s):
         visited.add(s[1])
 
         for n in next_states(s):
-            if n[1] not in visited:
+            if n[0] < best_cost[n[1]]:
+                best_cost[n[1]] = n[0]
                 heappush(q, n)
 
     return "No solution found"
