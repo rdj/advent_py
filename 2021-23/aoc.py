@@ -106,6 +106,8 @@ def next_states(s):
     #print(hallway)
     #print(rooms)
 
+    moved_to_fill = False
+
     for i, p in enumerate(inpods):
         x,y = p
         base_cost = COSTS[i//pertype]
@@ -126,11 +128,22 @@ def next_states(s):
                     break
             if not blocked:
                 #print(f"Pod {i} moving from hallway {p} to room {ri} {dst} at cost {steps} * {base_cost}")
+                moved_to_fill = True
                 yield (incost + steps * base_cost, inpods[:i] + (dst,) + inpods[i+1:])
             else:
                 #print(f"Pod {i} blocked from hallway {p} to room {ri} {dst}")
                 pass
-        else: # in room, must move to hallway
+
+    # If any pod can move into their room from the hallway, there is no reason
+    # to explore states where we move pods out of rooms
+    if moved_to_fill:
+        return
+
+    for i, p in enumerate(inpods):
+        x,y = p
+        base_cost = COSTS[i//pertype]
+
+        if y != YHALLWAY: # in room, must move to hallway
             ri = (x - X0ROOMS)//WROOM
             rs, yf = rooms[ri]
 
