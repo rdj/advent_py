@@ -37,11 +37,7 @@ def part1(s):
     steps = 0
 
     while True:
-        state = (frozenset(east), frozenset(south),)
-        if state == last:
-            return steps
-        last = state
-        steps += 1
+        movecount = 0
 
         for src, (dx, dy) in ((east, (1, 0)), (south, (0, 1))):
             moving = []
@@ -51,9 +47,14 @@ def part1(s):
                 if n in east or n in south:
                     continue
                 moving.append((p, n))
+            movecount += len(moving)
             for p, n in moving:
                 src.remove(p)
                 src.add(n)
+
+        steps += 1
+        if movecount == 0:
+            return steps
 
 
 def real_input():
