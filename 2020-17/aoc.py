@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 
-import numpy as np
+import itertools as it
+from collections import defaultdict
 
 
 ExampleInput1 = """\
@@ -12,46 +13,46 @@ ExampleInput1 = """\
 
 
 def parse(s):
-    return [[c == '#' for c in line] for line in s.splitlines()]
+    lines = s.splitlines()
+    return [(x, y) for y in range(len(lines)) for x in range(len(lines[0])) if lines[y][x] == '#']
 
 
-def dump(a):
-    s = []
-    for z in range(len(a)):
-        s.append(f"z={z}\n")
-        xy = a[:, :, z]
-        for y in range(len(a)):
-            for x in range(len(a)):
-                s.append("#" if xy[x, y] else ".")
-            s.append("\n")
-    print("".join(s))
+def subcube(p):
+    ndim = len(p)
+    x, y, z, *rest = p
+    a = [None] * 3**ndim
+    i = 0
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            for dz in range(-1, 2):
+                if ndim == 3:
+                    a[i] = (x+dx, y+dy, z+dz)
+                    i += 1
+                else:
+                    for dw in range(-1, 2):
+                        a[i] = (x+dx, y+dy, z+dz, rest[0] + dw)
+                        i += 1
+    return a
 
 
 def run(iv, niter, ndim):
-    size = max(len(iv), len(iv[0])) + 2*niter
-    if 0 == size % 2:
-        size += 1
-    src = np.zeros([size] * ndim, bool)
+    src = { p + (0,) * (ndim - 2) for p in iv }
 
-    for y in range(len(iv)):
-        for x in range(len(iv[0])):
-            idx = (x + niter, y + niter) + (niter,)*(ndim-2)
-            src[idx] = iv[y][x]
-
-    dst = np.empty_like(src)
     for i in range(niter):
-        it = np.nditer(src, flags=["multi_index"])
-        for c in it:
-            p = it.multi_index
-            slc = tuple([slice(v-1 if v-1 > 0 else 0, v+2 if v+2 < size else size) for v in p])
-            trues = np.count_nonzero(src[slc])
-            if c:
-                dst[p] = (2 <= trues - 1 <= 3)
-            else:
-                dst[p] = (3 == trues)
-        src, dst = dst, src
+        counts = defaultdict(int)
 
-    return src.sum()
+        for p in src:
+            for n in subcube(p):
+                counts[n] += 1
+
+        dst = set()
+        for p, n in counts.items():
+            if n == 3 or (n == 4 and p in src):
+                dst.add(p)
+
+        src = dst
+
+    return len(src)
 
 
 def part1(s):
