@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 
+from collections import deque
 import operator as Op
 import re
 
@@ -27,103 +28,107 @@ def parse(s):
     return [re.sub(" ", "", line) for line in s.splitlines()]
 
 
-def compute(s: str, pos: int) -> (int, int):
+def compute(toks: deque[str]) -> int:
     result = 0
     op = Op.add
 
-    i = pos
-    while i < len(s):
-        match s[i]:
-            case n if "0" <= n <= "9":
+    while toks:
+        match toks.popleft():
+            case n if str.isdigit(n):
                 result = op(result, int(n))
                 op = None
-                i += 1
 
             case '+':
                 op = Op.add
-                i += 1
 
             case '*':
                 op = Op.mul
-                i += 1
 
             case '(':
-                sub, i  = compute(s, i + 1)
-                result = op(result, sub)
+                result = op(result, compute(toks))
 
             case ')':
-                return result, i + 1
+                return result
 
-    return result, None
-
-
-def skipgroup(s:str, pos: int, d: int) -> int:
-    begin = "("
-    end = ")"
-    if d == -1:
-        begin, end = end, begin
-
-    assert(s[pos] == begin)
-    pos += d
-    while s[pos] != end:
-        if s[pos] == begin:
-            pos = skipgroup(s, pos, d)
-        else:
-            pos += d
-    return pos + d
-
-
-def parenthesize(s:str) -> str:
-    # first parenthesize all subgroups
-    i = 0
-    while i < len(s):
-        match s[i]:
-            case "(":
-                j = skipgroup(s, i, 1)
-                sub = parenthesize(s[i+1:j-1])
-                s = s[:i+1] + sub + s[j-1:]
-                i += len(sub)
-
-            case _:
-                i += 1
-
-    # then parenthesize the + ops at this level
-    i = 0
-    while i < len(s):
-        match s[i]:
-            case "(":
-                i = skipgroup(s, i, 1)
-
-            case "+":
-                # left paren before the preceding single digit number or
-                # grouped expression
-                j = i - 1
-                if s[j] == ")":
-                    j = skipgroup(s, j, -1)
-                    j += 1
-                s = s[:j] + "(" + s[j:]
-                i += 1
-
-                # right paren after the following single digit number or
-                # grouped expression
-                j = i + 1
-                if s[j] == "(":
-                    j = skipgroup(s, j, 1)
-                    j -=1
-                s = s[:j+1] + ")" + s[j+1:]
-                i += 1
-
-            case _:
-                i += 1
-    return s
+    return result
 
 
 def part1(s):
-    return sum(compute(line, 0)[0] for line in parse(s))
+    return sum(compute(deque(line)) for line in parse(s))
+
+
+# I rewrote my very brittle annoying string mutation solution based on
+# something I found in the reddit answers thread.
+#
+# This very clever approach allows you to process left-to-right even with the
+# new plus-first operator precedence.
+#
+# We only have to worry about three things, addition, multiplication, and
+# grouping. The problem statement makes it explicit that part 2 is equivalent
+# to adding groups around all addition statements.
+#
+# If we think about the relationship between those three things in terms of
+# just our normal real world algebra, one thing that pops out is the
+# distributive property of multiplication.
+#
+#     a * (b + c)  ===   a*b + b*c
+#     (a + b + ....) * (c + d + ...)  ===   (a+b+...)*c + (a+b+...)*d + ...
+#
+# And that's basically our whole problem. If you add another * and group at the
+# end, the multiplier part is just everything we have so far. If you add pluses
+# on either side, they get automatically grouped in with the existing plus
+# group. Any explicit parens get evaluated recursively to a value before
+# proceeding.
+#
+# Here's the most complicated example from the problem:
+#
+#     ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2
+#      (  6   * 9)
+#     ((     54  ) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2
+#                    ( 15   * 8 + 6)
+#                    ( [m=15] 8 + 6)
+#                    (      120 +90)
+#                    (         210 )
+#     (      54    *           210   + 6)
+#     (         [m=54]         210   + 6)
+#                           11340    + 324)
+#     (                           11664 ) + 2 + 4 * 2
+#                                       11666 + 4 * 2
+#                                           11670 * 2
+#                                              23340
+#
+# By default we just eat tokens and add them up. If we hit a *, we start over
+# but now with a multiplier. If we hit a ( we evaluate the subgroup
+# independently using the same rules recursively and then just deal with the
+# value that comes out.
+
+def compute2(toks: deque[str]) -> int:
+    result = 0
+    multiplier = 1
+
+    while toks:
+        match toks.popleft():
+            case n if str.isdigit(n):
+                result += int(n) * multiplier
+
+            case '+':
+                pass
+
+            case '*':
+                multiplier = result
+                result = 0
+
+            case '(':
+                result += compute2(toks) * multiplier
+
+            case ')':
+                return result
+
+    return result
 
 
 def part2(s):
-    return sum(compute(parenthesize(line), 0)[0] for line in parse(s))
+    return sum(compute2(deque(line)) for line in parse(s))
 
 
 def real_input():
