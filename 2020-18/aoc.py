@@ -3,7 +3,6 @@
 
 from collections import deque
 import operator as Op
-import re
 
 
 ExamplesPart1 = [
@@ -25,7 +24,7 @@ ExamplesPart2 = [
 
 
 def parse(s):
-    return [re.sub(" ", "", line) for line in s.splitlines()]
+    return s.splitlines()
 
 
 def compute(toks: deque[str]) -> int:
@@ -34,6 +33,9 @@ def compute(toks: deque[str]) -> int:
 
     while toks:
         match toks.popleft():
+            case " ":
+                pass
+
             case n if str.isdigit(n):
                 result = op(result, int(n))
                 op = None
@@ -108,6 +110,9 @@ def compute2(toks: deque[str]) -> int:
 
     while toks:
         match toks.popleft():
+            case " ":
+                pass
+
             case n if str.isdigit(n):
                 result += int(n) * multiplier
 
