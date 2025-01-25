@@ -117,14 +117,11 @@ Tile 3079:
 ..#.###...
 """
 
-# DARGON = """\
-#                   #
-# #    ##    ##    ###
-#  #  #  #  #  #  #"""
-
-DARGON = "^..................1.*\n^1....11....11....111.*\n^.1..1..1..1..1..1"
 # I don't think there's a way to match the same length of arbitrary padding on
-# each line, so just make enough regexes to cover all line lengths
+# each line, so just make enough regexes to cover all line lengths. I wrote a
+# version that just used numpy to find matches, but it took about 30% longer
+# compared this this silly set of regexes.
+DARGON = "^..................1.*\n^1....11....11....111.*\n^.1..1..1..1..1..1"
 DARGONS = [re.compile(re.sub(r"\^", "^" + "." * r, DARGON), flags=re.MULTILINE) for r in range(100-20)]
 DARGON_SIZE = len(re.findall("1", DARGON))
 
@@ -136,9 +133,9 @@ ROTATIONS = (
     lambda a: np.rot90(np.rot90(np.rot90(a))),
 )
 
-FLIPS = tuple(map(lambda r: lambda a: np.fliplr(r(a)), ROTATIONS))
+FLIPPED_ROTATIONS = tuple(map(lambda r: lambda a: np.fliplr(r(a)), ROTATIONS))
 
-ORIENTATIONS = ROTATIONS + FLIPS
+ORIENTATIONS = ROTATIONS + FLIPPED_ROTATIONS
 
 
 def parse(s):
@@ -149,7 +146,7 @@ def parse(s):
     for block in s.split("\n\n"):
         lines = block.splitlines()
         blockid = int(lines[0].split()[-1][:-1])
-        a = np.array([list(line) for line in lines[1:]])
+        a = np.array([list(line) for line in lines[1:]], np.uint8)
         blocks[blockid] = [o(a) for o in ORIENTATIONS]
         for a in blocks[blockid]:
             edges[tuple(a[0])].append(blockid)
