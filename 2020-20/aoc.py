@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 
 from collections import defaultdict, Counter
@@ -117,14 +117,16 @@ Tile 3079:
 ..#.###...
 """
 
-                  #
-#    ##    ##    ###
- #  #  #  #  #  #
-DARGON = "^..................#.*\n^#....##....##....###.*\n^.#..#..#..#..#..#"
+# DARGON = """\
+#                   #
+# #    ##    ##    ###
+#  #  #  #  #  #  #"""
+
+DARGON = "^..................1.*\n^1....11....11....111.*\n^.1..1..1..1..1..1"
 # I don't think there's a way to match the same length of arbitrary padding on
 # each line, so just make enough regexes to cover all line lengths
 DARGONS = [re.compile(re.sub(r"\^", "^" + "." * r, DARGON), flags=re.MULTILINE) for r in range(100-20)]
-DARGON_SIZE = len(re.findall("#", DARGON))
+DARGON_SIZE = len(re.findall("1", DARGON))
 
 
 ROTATIONS = (
@@ -140,6 +142,7 @@ ORIENTATIONS = ROTATIONS + FLIPS
 
 
 def parse(s):
+    s = s.translate(s.maketrans(".#", "01"))
     blocks = {}
     edges = defaultdict(list)
 
@@ -149,7 +152,7 @@ def parse(s):
         a = np.array([list(line) for line in lines[1:]])
         blocks[blockid] = [o(a) for o in ORIENTATIONS]
         for a in blocks[blockid]:
-            edges["".join(a[0])].append(blockid)
+            edges[tuple(a[0])].append(blockid)
 
     return blocks, edges
 
@@ -172,34 +175,35 @@ def solve(blocks, edges):
     # orientation. (Note that there are 2 valid orientations.)
     start = find_corners(edges)[0]
     for i, a in enumerate(blocks[start]):
-        topmatches = edges["".join(a[0])]
-        leftmatches = edges["".join(a[:, 0])]
+        topmatches = edges[tuple(a[0])]
+        leftmatches = edges[tuple(a[:, 0])]
         if len(topmatches) == 1 and len(leftmatches) == 1:
             img[0][0] = (start, i)
             break
+
+    def _match(imgji, src_edge, dst_edge):
+        srcb, srco = imgji
+        src = blocks[srcb][srco]
+        e = tuple(src[src_edge])
+        dstb = [b for b in edges[e] if b != srcb][0]
+        for k, a in enumerate(blocks[dstb]):
+            if e == tuple(a[dst_edge]):
+                return (dstb, k)
+
+    def match_above(imgji):
+        return _match(imgji, (-1, slice(None)), (0, slice(None)))
+
+    def match_left(imgji):
+        return _match(imgji, (slice(None), -1), (slice(None), 0))
 
     for j in range(dim):
         for i in range(dim):
             if (i,j) == (0,0):
                 continue
             if i == 0:
-                # match above
-                srcb, srco = img[j-1, i]
-                src = blocks[srcb][srco]
-                e = "".join(src[-1])
-                dstb = [b for b in edges[e] if b != srcb][0]
-                for k, a in enumerate(blocks[dstb]):
-                    if e == "".join(a[0]):
-                        img[j][i] = (dstb, k)
+                img[j][i] = match_above(img[j-1, i])
             else:
-                # match left
-                srcb, srco = img[j, i-1]
-                src = blocks[srcb][srco]
-                e = "".join(src[:, -1])
-                dstb = [b for b in edges[e] if b != srcb][0]
-                for k, a in enumerate(blocks[dstb]):
-                    if e == "".join(a[:, 0]):
-                        img[j][i] = (dstb, k)
+                img[j][i] = match_left(img[j, i-1])
 
     return img
 
@@ -209,7 +213,7 @@ def assemble(blocks, edges):
     nblocks = len(sol)
     nchars = len(blocks[sol[0][0][0]])
     dim = nblocks * nchars
-    img = np.full((dim, dim), " ")
+    img = np.empty((dim, dim), np.uint8)
 
     for j in range(nblocks):
         for i in range(nblocks):
@@ -226,10 +230,11 @@ def part2(s):
     pounds = 0
     found = 0
     for i, o in enumerate(ORIENTATIONS):
-        s = "\n".join(["".join(line) for line in o(img)])
+        a = o(img)
+        s = "\n".join(["".join(map(lambda c: str(int(c)), line)) for line in a])
         found = sum(len(re.findall(d, s)) for d in DARGONS)
         if found:
-            pounds = len(re.findall("#", s))
+            pounds = int(a.sum())
             break
 
     return pounds - DARGON_SIZE*found
