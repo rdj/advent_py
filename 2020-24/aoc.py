@@ -1,37 +1,5 @@
 #!/usr/bin/env pypy3
 
-## Things I used in previous years
-
-# from colors import color  ## pip install py-colors
-# from collections import Counter
-# from collections import defaultdict
-# from collections import deque
-# from colors import color
-# from enum import Enum
-# from fractions import Fraction
-# from functools import cached_property
-# from functools import lru_cache
-# from functools import reduce
-# from functools import reduce, partial
-# from heapq import heappush, heappop
-# from itertools import pairwise
-# from math import prod
-# from more_itertools import chunked, sliding_window
-# from multiprocessing import Pool
-# from numpy import transpose
-# from operator import mul
-# from pathlib import Path
-# from typing import NamedTuple
-# import cProfile
-# import functools as ft
-# import itertools as it
-# import math
-# import networkx as nx
-# import operator as op
-# import pygraphviz as pgv
-# import re
-# import sympy
-
 
 ExampleInput1 = """\
 sesenwnenenewseeswwswswwnenewsewsw
@@ -59,36 +27,28 @@ wseweeenwnesenwwwswnew
 
 import re
 
-from collections import Counter, defaultdict
-from typing import NamedTuple
+from collections import defaultdict
 
 
-class HexPoint(NamedTuple):
-    q: int
-    r: int
-    s: int
+def go(p, d):
+    dq, dr = DIRECTIONS[d]
+    p[0] += dq
+    p[1] += dr
 
-    def __add__(self, other):
-        q0, r0, s0 = self
-        q1, r1, s1 = other
-        return HexPoint(q0+q1, r0+r1, s0+s1)
 
-    def __repr__(self):
-        q, r, s = self
-        return f"({q}, {r}, {s})"
-
-    def neighbors(self):
-        return [self + d for d in DIRECTIONS.values()]
+def neighbors(p):
+    for dq, dr in DIRECTIONS.values():
+        yield (p[0] + dq, p[1] + dr)
 
 
 # https://www.redblobgames.com/grids/hexagons/
 DIRECTIONS = {
-    'nw': ( 0, -1, +1),
-    'ne': (+1, -1,  0),
-    'e':  (+1,  0, -1),
-    'se': ( 0, +1, -1),
-    'sw': (-1, +1,  0),
-    'w':  (-1,  0, +1),
+    'nw': ( 0, -1),
+    'ne': (+1, -1),
+    'e':  (+1,  0),
+    'se': ( 0, +1),
+    'sw': (-1, +1),
+    'w':  (-1,  0),
 }
 
 WHITE = False
@@ -100,9 +60,10 @@ def parse(s):
     for line in s.splitlines():
         line = re.sub(r"(e|w|nw|ne|sw|se)", r"\1 ", line)
 
-        p = HexPoint(0, 0, 0)
+        p = [0, 0]
         for d in line.split():
-            p += DIRECTIONS[d]
+            go(p, d)
+        p = tuple(p)
         points[p] = not points[p]
 
     return points
@@ -120,7 +81,7 @@ def part2(s):
         for t, isblack in tiles.items():
             if not isblack:
                 continue
-            for n in t.neighbors():
+            for n in neighbors(t):
                 ncount[n] += 1
 
         newtiles = defaultdict(bool)
