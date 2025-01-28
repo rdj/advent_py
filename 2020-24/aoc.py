@@ -25,8 +25,6 @@ wseweeenwnesenwwwswnew
 """
 
 
-import re
-
 from collections import defaultdict
 
 
@@ -58,10 +56,12 @@ def parse(s):
     points = defaultdict(bool)
 
     for line in s.splitlines():
-        line = re.sub(r"(e|w|nw|ne|sw|se)", r"\1 ", line)
-
         p = [0, 0]
-        for d in line.split():
+        while line:
+            d, *line = line
+            if d in ("n", "s"):
+                d += line[0]
+                line = line[1:]
             go(p, d)
         p = tuple(p)
         points[p] = not points[p]
