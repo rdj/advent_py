@@ -53,20 +53,20 @@ WHITE = False
 BLACK = True
 
 def parse(s):
-    points = defaultdict(bool)
+    tiles = defaultdict(bool)
 
     for line in s.splitlines():
-        p = [0, 0]
+        t = [0, 0]
         while line:
             d, *line = line
             if d in ("n", "s"):
                 d += line[0]
                 line = line[1:]
-            go(p, d)
-        p = tuple(p)
-        points[p] = not points[p]
+            go(t, d)
+        t = tuple(t)
+        tiles[t] = not tiles[t]
 
-    return points
+    return tiles
 
 
 def part1(s):
@@ -89,10 +89,8 @@ def part2(s):
             isblack = tiles[t]
             if isblack and (n == 0 or n > 2):
                 newtiles[t] = WHITE
-            elif not isblack and n == 2:
+            elif isblack or (not isblack and n == 2):
                 newtiles[t] = BLACK
-            else:
-                newtiles[t] = isblack
 
         tiles = newtiles
 
