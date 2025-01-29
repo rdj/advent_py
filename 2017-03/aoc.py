@@ -82,11 +82,6 @@ def part1(s):
     return manhattan(parse(s))
 
 
-def allcorners(start):
-    for n in count(start):
-        yield from corners(n)
-
-
 def ispiral():
     # Ring 0 is special
     n = 1
@@ -94,8 +89,7 @@ def ispiral():
     yield x, y
 
     # For each ring outwards ...
-    corners = allcorners(1)
-    while True:
+    for r in count(1):
         # ... start one to the right of the previous ring's end ...
         n += 1
         x += 1
@@ -103,9 +97,8 @@ def ispiral():
 
         # ... move upwards ...
         dx, dy = 0, -1
-        for _ in range(4):
-            corner = next(corners)
-            while n < corner:
+        for c in corners(r):
+            while n < c:
                 n += 1
                 x += dx
                 y += dy
