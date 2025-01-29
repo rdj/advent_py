@@ -1,7 +1,7 @@
 #!/usr/bin/env pypy3
 
 from collections import defaultdict
-from itertools import product, islice
+from itertools import count, product
 
 
 ExamplesPart1 = (
@@ -16,56 +16,93 @@ def parse(s):
     return int(s.strip())
 
 
-def part1(s):
-    n = parse(s)
-    if n == 1:
-        return 0
+# Example spiral:
+#
+#   17  16  15  14  13
+#   18   5   4   3  12 .
+#   19   6   1   2  11 .
+#   20   7   8   9  10 .   .
+#   21  22  23  24  25 26  .   .
+#                  ... 49 ...  .
+#                     ...  81 ...
+#
+# Notice the odd squares starting at one moving down-right:
+#   - 1, 9, 25, 49, 81, ...
+#
+# Each ring of the spiral runs from an odd square + 1 to the next odd square.
+# We want to number the rings based on their distance from the center.
+#  - Ring 0 =           1 ...  1 = 1*1  (inclusive ranges)
+#  - Ring 1 =  1 + 1 =  2 ...  9 = 3*3
+#  - Ring 2 =  9 + 1 = 10 ... 25 = 5*5
+#  - Ring 3 = 25 + 1 = 26 ... 49 = 7*7
+#  - ...
+#
+def ring(n):
+    if n == 0:
+        return range(1, 2)
+    return range(ring(n-1)[-1] + 1, (2*n + 1)*(2*n + 1) + 1)
 
-    ring = (int((n - 1) ** 0.5) + 1) // 2
 
-    ringstart = (ring * 2 - 1)
-    ringstart *= ringstart
-    ringstart += 1
+# Each ring of the spiral starts one position to the right of the odd square
+# that ended the previous ring. The new ring progresses counter-clockwise
+# around the grid to end with the odd square in the bottom-right corner.
+# It's easiest to find the corners by starting at the end and subtracting.
+#
+# For example:
+#  - r = ring(1) == range(2, 10)
+#    len(r) // 4 == 8 // 4 == 2
+#    corners [ 9, (-2=) 7, (-2=) 5, (-2)= 3 ]
+#  - r = ring(2) == range(10, 26)
+#    len(r) // 4 == 16 // 4 == 4
+#    corners [ 25, (-4=) 21, (-4=) 17, (=4=) 13 ]
+#
+def corners(n):
+    r = ring(n)
+    delta = len(r) // 4
+    return [r[-1] - (3-x) * delta for x in range(4)]
 
-    ringend = (ring * 2 + 1)
-    ringend *= ringend
 
-    delta = (ringend + 1 - ringstart) // 4
+# The shortest path to the center (and hence length of the manhattan distance)
+# is going to be along a side to the nearest midpoint then towards the center.
+# The distance of the ring from the center is simply its ring number. We can
+# find the midpoints based on the corners.
+def midpoints(n):
+    corns = corners(n)
+    delta = (corns[1] - corns[0]) // 2
+    return [c - delta for c in corns]
 
-    corners = [ringend - n * delta for n in range(4)]
-    mids = [c - delta // 2 for c in corners]
-    dist = min(abs(n - m) for m in mids)
 
+def manhattan(x):
+    ring = (int((x - 1) ** 0.5) + 1) // 2
+    dist = min(abs(x - m) for m in midpoints(ring))
     return ring + dist
 
 
-def icorners():
-    n = 1
-    nsq = 1
-    while True:
-        n += 2 # odds only
+def part1(s):
+    return manhattan(parse(s))
 
-        prevsq = nsq
-        nsq = n*n
 
-        delta = (nsq - prevsq) // 4
-        corners = [nsq - (3-x) * delta for x in range(4)]
-        yield from corners
+def allcorners(start):
+    for n in count(start):
+        yield from corners(n)
 
 
 def ispiral():
+    # Ring 0 is special
     n = 1
     x, y = 0, 0
     yield x, y
 
-    corners = icorners()
-
+    # For each ring outwards ...
+    corners = allcorners(1)
     while True:
+        # ... start one to the right of the previous ring's end ...
         n += 1
         x += 1
-        dx, dy = 0, -1
         yield x, y
 
+        # ... move upwards ...
+        dx, dy = 0, -1
         for _ in range(4):
             corner = next(corners)
             while n < corner:
@@ -73,6 +110,7 @@ def ispiral():
                 x += dx
                 y += dy
                 yield x, y
+            # .. and turn counterclockwise at each corner
             dx, dy = dy, -dx
 
 
