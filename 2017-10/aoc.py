@@ -57,7 +57,7 @@ def part2(s):
         chunk, a = a[:16], a[16:]
         blocks.append(reduce(lambda a, b: a ^ b, chunk))
 
-    return "".join(map(lambda n: str.format("{0:02x}", n), blocks))
+    return "".join(f"{b:02x}" for b in blocks)
 
 
 def real_input():
