@@ -33,8 +33,15 @@
 # import sympy
 
 
-ExampleInput1 = """\
+MultiLineExample = """\
 """
+
+ExamplesPart1 = (
+    # ("input", output),
+)
+
+ExamplesPart2 = (
+)
 
 
 def part1(s):
@@ -51,19 +58,25 @@ def real_input():
 
 
 def run_all():
-    print("Example Part 1")
-    print(part1(ExampleInput1))
+    for i, (a, b) in enumerate(ExamplesPart1):
+        c = part1(a)
+        check = "✅️" if b == c else "⚠️"
+        print(f"Example Part 1.{i} ({b})")
+        print(check, c)
+        print()
 
-    print()
-    print("Part 1")
+    print("Part 1 ()")
     print(part1(real_input()))
-
     print()
-    print("Example Part 2")
-    print(part2(ExampleInput1))
 
-    print()
-    print("Part 2")
+    for i, (a, b) in enumerate(ExamplesPart2):
+        c = part2(a)
+        check = "✅️" if b == c else "⚠️"
+        print(f"Example Part 2.{i} ({b})")
+        print(check, c)
+        print()
+
+    print("Part 2 ()")
     print(part2(real_input()))
 
 
