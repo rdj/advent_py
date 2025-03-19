@@ -1,0 +1,36 @@
+   0 d = a
+   1 c = 4
+   ### LOOP C
+*  2 b = 643
+   ### LOOP B
+*  3 d++
+   4 b--
+   5 if b: goto 3
+   ###
+   6 c--
+   7 if c: goto 2
+   ###
+*  8 a = d
+*  9 pass
+  10 b = a
+  11 a = 0
+  12 c = 2
+  ### LOOP B/C
+* 13 if b: goto 15
+  14 goto 20
+* 15 b--
+  16 c--
+  17 if c: goto 13
+  ###
+  18 a++
+  19 goto 12
+* 20 b = 2
+* 21 if c: goto 23
+  22 goto 26
+* 23 b--
+  24 c--
+  25 goto 21
+* 26 noop
+  27 out b
+  28 if a: goto 9
+  29 goto 8
