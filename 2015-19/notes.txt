@@ -1,0 +1,53 @@
+Nonterminals
+{'Al', 'B', 'Ca', 'F', 'H', 'Mg', 'N', 'O', 'P', 'Si', 'Th', 'Ti', 'e'}
+Terminals
+{'Rn', ')', ',', 'C'}
+  (     )     ,   0
+
+
+Al => ThF
+Al => Th(F)
+B => BCa
+B => TiB
+B => Ti(F)
+Ca => CaCa
+Ca => PB
+Ca => P(F)
+Ca => Si(F,F)
+Ca => Si(Mg)
+Ca => SiTh
+F => CaF
+F => PMg
+F => SiAl
+H => 0(Al)
+H => 0(F,F,F)
+H => 0(F,Mg)
+H => 0(Mg,F)
+H => HCa
+H => N(F,F)
+H => N(Mg)
+H => NTh
+H => OB
+H => O(F)
+Mg => BF
+Mg => TiMg
+N => 0(F)
+N => HSi
+O => 0(F,F)
+O => 0(Mg)
+O => HP
+O => N(F)
+O => OTi
+P => CaP
+P => PTi
+P => Si(F)
+Si => CaSi
+Th => ThCa
+Ti => BP
+Ti => TiTi
+e => HF
+e => NAl
+e => OMg
+
+
+0(CaCaCaSi(BPTiMg)Si(Si(Mg)Si(CaF)TiTiBSiThF,CaF)CaCaSiThCaPBSiThSiThCaCaPTi(PBSiTh(F))CaCaSiThCaSiThSi(Mg)CaPTiBP(F)SiThCaSi(F)BCaSi(CaP(F)PMg,CaF)CaPTiTiTiBPBSiThCaPTiBPBSi(F)BPBSi(CaF)BP(Si(F)(Si(BF)CaF)CaCaCaSiThSiThCaCaPBPTiTi(F)CaPTiBSiAl)PBCaCaCaCaCaSi(Mg)CaSiThF)ThCaSiThCaSi(CaF,CaSi(F,F)F)CaSi(F,F)CaSi(BPMg)SiThP(F)CaSi(F)Ti(Si(F,F)CaSi(BF)CaSi(TiMg)SiThCaSiThCaF)P(F)Si(F)TiTiTiTiBCaCaSi(CaCaF,F)SiThCaPTiBPTiBCaSiThSi(Mg)CaF
