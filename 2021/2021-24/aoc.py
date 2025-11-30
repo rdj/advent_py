@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 # Generally, see input-annotated.txt.
 # A lot of this is from grokking the assembly-like input.

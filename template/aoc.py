@@ -1,36 +1,57 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 ## Things I used in previous years
 
 # from colors import color  ## pip install py-colors
+
+# from bitstring import Bits, BitStream
 # from collections import Counter
 # from collections import defaultdict
 # from collections import deque
-# from colors import color
-# from enum import Enum
+# from copy import deepcopy
+# from dataclasses import dataclass, astuple, replace
+# from enum import Enum, IntEnum, auto
 # from fractions import Fraction
-# from functools import cached_property
+# from functools import cache, cached_property
+# from functools import cmp_to_key
 # from functools import lru_cache
+# from functools import partial
 # from functools import reduce
-# from functools import reduce, partial
 # from heapq import heappush, heappop
+# from itertools import combinations
+# from itertools import count
+# from itertools import cycle
+# from itertools import groupby
+# from itertools import islice
 # from itertools import pairwise
+# from itertools import permutations
+# from itertools import product    ## Cartesian product
+# from math import log
 # from math import prod
-# from more_itertools import chunked, sliding_window
+# from math import sqrt
+# from more_itertools import batched
+# from more_itertools import chunked
+# from more_itertools import ilen
+# from more_itertools import sliding_window
 # from multiprocessing import Pool
 # from numpy import transpose
-# from operator import mul
 # from pathlib import Path
+# #from scipy.signal import convolve2d ## pypy3 unsupported
 # from typing import NamedTuple
+# import _md5
 # import cProfile
 # import functools as ft
 # import itertools as it
+# import json
 # import math
 # import networkx as nx
+# import numpy as np
 # import operator as op
 # import pygraphviz as pgv
 # import re
+# import regex # supports overlapped matches, recursive subpatterns (?<foo>...(?&foo)*...)
 # import sympy
+# import z3 # pip install z3-solver
 
 
 MultiLineExample = """\

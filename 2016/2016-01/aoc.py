@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 ExamplesPart1 = (
     ("R2, L3", 5),

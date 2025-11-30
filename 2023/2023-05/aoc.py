@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import itertools as it
+import more_itertools as it
 from multiprocessing import Pool
 
 ExampleInput1 = """\
