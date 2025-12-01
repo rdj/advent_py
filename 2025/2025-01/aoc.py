@@ -58,12 +58,10 @@ def part2(s):
             base = 1
             if n == 0:
                 base = 0
-            if x >= n:
-                zeros = base + (x - n) // 100
+            zeros = base + (x - n) // 100
             n = (n - x) % 100
         else:
-            if (x + n) >= 100:
-                zeros = (x + n) // 100
+            zeros = (x + n) // 100
             n = (n + x) % 100
         c += zeros
     return c
