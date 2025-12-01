@@ -13,7 +13,7 @@ fi
 DAY_2D=$(printf '%02d' ${DAY})
 
 PROJECT="${YEAR}-${DAY_2D}"
-PROJECT_DIR="${MY_DIR}/${PROJECT}"
+PROJECT_DIR="${MY_DIR}/${YEAR}/${PROJECT}"
 
 mkdir -p "${PROJECT_DIR}"
 "${MY_DIR}/aoc-input.sh" "${DAY}" "${YEAR}" > "${PROJECT_DIR}/input.txt"
