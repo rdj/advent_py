@@ -55,9 +55,7 @@ def part2(s):
 
         zeros = 0
         if d == 'L':
-            base = 1
-            if n == 0:
-                base = 0
+            base = 1 if n > 0 else 0
             zeros = base + (x - n) // 100
             n = (n - x) % 100
         else:
