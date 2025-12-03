@@ -34,25 +34,18 @@ def part1(s):
     return sum(map(best_joltage, parse(s)))
 
 
-def best_joltage_recur(b, wanted, accum):
+def best_joltage_n(b, wanted):
     if wanted == 0:
-        return
+        return 0
 
-    if wanted == len(b):
-        accum += b
-        return
-
-    n = max(b[:-(wanted - 1)]) if wanted > 1 else max(b)
+    remain = wanted - 1
+    n = max(b[:-remain]) if remain > 0 else max(b)
     i = b.index(n)
-    accum.append(n)
-    best_joltage_recur(b[i+1:], wanted - 1, accum)
+    return n * (10 ** remain) + best_joltage_n(b[i+1:], remain)
 
 
 def best_joltage2(b):
-    accum = []
-    best_joltage_recur(b, 12, accum)
-    j = int(''.join(map(str,accum)))
-    return j
+    return best_joltage_n(b, 12)
 
 
 def part2(s):
