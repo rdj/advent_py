@@ -29,7 +29,7 @@ def parse(s):
 
     grid.append(padrow)
     for line in s.splitlines():
-        grid.append([1 if c == '@' else 0 for c in '.'+line+'.'])
+        grid.append([c == '@' for c in '.'+line+'.'])
     grid.append(padrow)
 
     return grid
