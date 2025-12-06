@@ -2,6 +2,7 @@
 
 from functools import reduce
 import operator
+import re
 
 # Leading and trailing whitespace is important
 MultiLineExample = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  \n"
@@ -42,8 +43,9 @@ def part1(s):
     return sum(map(evalprob, parse(s)))
 
 
-def parse2(s):
+def parse2_vertically(s):
     lines = s.splitlines()
+
     lines, opline = lines[:-1], lines[-1]
     ops = [OPS[s] for s in opline.split()]
 
@@ -67,8 +69,27 @@ def parse2(s):
     return probs
 
 
+def parse2_transposed(s):
+    lines = s.splitlines()
+    assert(all(len(line) == len(lines[0])) for line in lines)
+
+    lines, opline = lines[:-1], lines[-1]
+    ops = [OPS[s] for s in opline.split()]
+
+    flipped = "\n".join("".join(x) for x in zip(*lines))
+    sprobs = re.split(r'^[ ]+\n', flipped, flags=re.MULTILINE)
+    probs = []
+    for sprob in sprobs:
+        op, ops = ops[0], ops[1:]
+        nums = list(map(int, sprob.splitlines()))
+        probs.append([op, nums])
+
+    assert(0 == len(ops))
+    return probs
+
+
 def part2(s):
-    return sum(map(evalprob, parse2(s)))
+    return sum(map(evalprob, parse2_transposed(s)))
 
 
 def real_input():
