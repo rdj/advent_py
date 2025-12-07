@@ -96,6 +96,7 @@ def real_input():
 
 
 def run_all():
+    import time
     for i, (a, b) in enumerate(ExamplesPart1):
         c = part1(a)
         check = "✅️" if b == c else "⚠️"
@@ -104,7 +105,10 @@ def run_all():
         print()
 
     print("Part 1 (1566)")
-    print(part1(real_input()))
+    before = time.perf_counter_ns()
+    result = part1(real_input())
+    elapsed = time.perf_counter_ns() - before
+    print(f"{result} ({elapsed//1_000_000} ms)")
     print()
 
     for i, (a, b) in enumerate(ExamplesPart2):
@@ -115,7 +119,10 @@ def run_all():
         print()
 
     print("Part 2 (5921061943075)")
-    print(part2(real_input()))
+    before = time.perf_counter_ns()
+    result = part2(real_input())
+    elapsed = time.perf_counter_ns() - before
+    print(f"{result} ({elapsed//1_000_000} ms)")
 
 
 if __name__ == "__main__":
