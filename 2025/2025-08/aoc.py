@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from itertools import combinations
-from itertools import islice
+from heapq import heappush, heappop, nlargest
 from math import prod
 
 MultiLineExample = """\
@@ -52,8 +52,10 @@ def dist(a, b):
 
 def part1(s, stopafter=1000):
     points = parse(s)
-    distances = [(dist(a, b), a, b) for a, b in combinations(points, 2)]
-    distances.sort()
+
+    distances = []
+    for d in [(dist(a, b), a, b) for a, b in combinations(points, 2)]:
+        heappush(distances, d)
 
     nets = defaultdict(set)
     p2n = {}
@@ -61,7 +63,8 @@ def part1(s, stopafter=1000):
 
     connections = 0
 
-    for _, a, b in distances:
+    while d := heappop(distances):
+        _, a, b = d
         dst = None
         na = p2n[a] if a in p2n else None
         nb = p2n[b] if b in p2n else None
@@ -88,7 +91,7 @@ def part1(s, stopafter=1000):
         if stopafter:
             connections += 1
             if connections == stopafter:
-                return prod(islice(reversed(sorted(map(len, nets.values()))), 0, 3))
+                return prod(nlargest(3, [len(n) for n in nets.values()]))
         elif dst:
             if len(nets[dst]) == len(points):
                 return a[0] * b[0]
@@ -135,4 +138,6 @@ def run_all():
 
 
 if __name__ == "__main__":
+    # import cProfile
+    # cProfile.run('part2(real_input())', sort="cumulative")
     run_all()
