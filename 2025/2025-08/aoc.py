@@ -87,7 +87,7 @@ def part1(s, stopafter=1000):
 
         if stopafter:
             connections += 1
-            if stopafter and connections == stopafter:
+            if connections == stopafter:
                 return prod(islice(reversed(sorted(map(len, nets.values()))), 0, 3))
         elif dst:
             if len(nets[dst]) == len(points):
