@@ -18,6 +18,7 @@
 # from functools import partial
 # from functools import reduce
 # from heapq import heappush, heappop
+# from heapq import nlargest # works on any iterable
 # from itertools import combinations
 # from itertools import count
 # from itertools import cycle
@@ -111,4 +112,6 @@ def run_all():
 
 
 if __name__ == "__main__":
+    # import cProfile
+    # cProfile.run('part2(real_input())', sort="cumulative")
     run_all()
