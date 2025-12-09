@@ -38,6 +38,8 @@
 # from numpy import transpose
 # from pathlib import Path
 # #from scipy.signal import convolve2d ## pypy3 unsupported
+# from shapely import Polygon
+# from shapely.geometry import box
 # from typing import NamedTuple
 # import _md5
 # import cProfile
