@@ -57,11 +57,12 @@ def part2(s):
 
     poly = Polygon(points + [points[0]])
 
-    best = 0
-    for a, b in combinations(points, 2):
+    rects = [(-area(a, b), a, b) for a, b in combinations(points, 2)]
+    rects.sort()
+
+    for _, a, b in rects:
         if poly.contains(makerect(a, b)):
-            best = max(best, area(a, b))
-    return best
+            return area(a, b)
 
 
 def real_input():
