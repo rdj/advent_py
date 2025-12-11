@@ -57,19 +57,13 @@ def sorted_candidates(points):
     return rects
 
 
-def makerect_shapely(a, b):
-    x1, y1 = a
-    x2, y2 = b
-    return box(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))
-
-
-def part2_shapely(s): # runtime ~1200ms
+def part2_shapely(s): # runtime ~1 second
     points = parse(s)
 
     poly = Polygon(points + [points[0]])
 
     for _, a, b in sorted_candidates(points):
-        if poly.contains(makerect_shapely(a, b)):
+        if poly.contains(box(*a, *b)):
             return area(a, b)
 
 
@@ -125,8 +119,6 @@ def part2_nolib(s): # runtime ~8-9 seconds
     for _, a, b in sorted_candidates(points):
         if not inner_intersect(a, b, points):
             return area(a, b)
-
-
 
 
 def real_input():
